@@ -25,14 +25,6 @@ intersect(const Ray&  _ray,
           vec3&       _intersection_normal,
           double&     _intersection_t) const
 {
-    /** \todo
-     * - compute the first valid intersection `_ray` with the cylinder
-     *   (valid means in front of the viewer: t > 0)
-     * - store intersection point in `_intersection_point`
-     * - store ray parameter in `_intersection_t`
-     * - store normal at _intersection_point in `_intersection_normal`.
-     * - return whether there is an intersection with t > 0
-    */
 
     const vec3 &dir = _ray.direction;
     const vec3   oc = _ray.origin - center;
