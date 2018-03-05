@@ -7,6 +7,3 @@ Collaborators:
 Havard Bjornoy
 Justinas Sukaitis
 Sebastien Chevaleyre
-
-
-
