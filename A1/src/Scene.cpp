@@ -114,16 +114,28 @@ vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view,
 
      /** \todo
      * Compute the Phong lighting:
-     * - start with global ambient contribution
-     * - for each light source (stored in vector `lights`) add diffuse and specular contribution
-     * - only add diffuse and specular light if object is not in shadow
-     *
-     * You can look at the classes `Light` and `Material` to check their attributes. Feel free to use
+     * - start with global ambient contribution*/
+     vec3 color = ambience * _material.ambient;
+     /* - for each light source (stored in vector `lights`) add diffuse and specular contribution
+     * - only add diffuse and specular light if object is not in shadow */
+    for (Light _light : lights)
+    {
+        Ray _ray = Ray(_point + 1e-6 * _normal, _light.position - _point);
+        Object_ptr  object;
+        vec3        point;
+        vec3        normal;
+        double      t;
+        if (!intersect(_ray, object, point, normal, t))
+        {
+           color = 2*color-color*color; //TO MODIFY
+        }
+     }
+     /* You can look at the classes `Light` and `Material` to check their attributes. Feel free to use
      * the existing vector functions in vec3.h e.g. mirror, reflect, norm, dot, normalize
      */
 
     // visualize the normal as a RGB color for now.
-    vec3 color = (_normal + vec3(1)) / 2.0;
+    //vec3 color = (_normal + vec3(1)) / 2.0;
 
     return color;
 }
