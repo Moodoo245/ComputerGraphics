@@ -72,7 +72,7 @@ vec3 Scene::trace(const Ray& _ray, int _depth)
   vec3 color = lighting(point, normal, -_ray.direction, object->material);
 
 
-  /** \todo
+  /**
   * Compute reflections by recursive ray tracing:
   * - check whether `object` is reflective by checking its `material.mirror`
   * - check recursion depth
@@ -80,10 +80,11 @@ vec3 Scene::trace(const Ray& _ray, int _depth)
 
   // check if the material is mirrorlike
   double a = object -> material.mirror;
-  
+
   if(a != 0 && (_depth < max_depth)){
     vec3 reflected_color = vec3(0,0,0);
     //generate reflected ray, compute its color contribution, and mix it with
+    //the color computed by local Phong lighting
     vec3 r = reflect(_ray.direction, normal);
     Ray reflect_ray = Ray(point + 1e-6 * normal, r);
     reflected_color = trace(reflect_ray, _depth+1);
@@ -122,7 +123,7 @@ bool Scene::intersect(const Ray& _ray, Object_ptr& _object, vec3& _point, vec3& 
 vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view, const Material& _material)
 {
 
-  /** \todo
+  /**
   * Compute the Phong lighting:
   * - start with global ambient contribution*/
   vec3 color = ambience * _material.ambient;
