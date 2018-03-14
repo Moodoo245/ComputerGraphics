@@ -80,9 +80,9 @@ vec3 Scene::trace(const Ray& _ray, int _depth)
 
   // check if the material is mirrorlike
   double a = object -> material.mirror;
-  vec3 reflected_color = vec3(0,0,0);
+  
   if(a != 0 && (_depth < max_depth)){
-
+    vec3 reflected_color = vec3(0,0,0);
     //generate reflected ray, compute its color contribution, and mix it with
     vec3 r = reflect(_ray.direction, normal);
     Ray reflect_ray = Ray(point + 1e-6 * normal, r);
