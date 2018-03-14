@@ -13,6 +13,7 @@
 
 #include "Plane.h"
 #include <limits>
+#include <cmath>
 
 //== CLASS DEFINITION =========================================================
 

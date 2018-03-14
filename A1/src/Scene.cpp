@@ -77,6 +77,8 @@ vec3 Scene::trace(const Ray& _ray, int _depth)
   * - check whether `object` is reflective by checking its `material.mirror`
   * - check recursion depth
   */
+
+  // check if the material is mirrorlike
   double a = object -> material.mirror;
   vec3 reflected_color = vec3(0,0,0);
   if(a != 0 && (_depth < max_depth)){
@@ -85,10 +87,11 @@ vec3 Scene::trace(const Ray& _ray, int _depth)
     vec3 r = reflect(_ray.direction, normal);
     Ray reflect_ray = Ray(point + 1e-6 * normal, r);
     reflected_color = trace(reflect_ray, _depth+1);
+    color = ((1 - a)* color + a * reflected_color);
     //the color computed by local Phong lighting (use `object->material.mirror` as weight)
     //check whether your recursive algorithm reflects the ray `max_depth` times
   }
-  return ((1 - a)* color + a * reflected_color);
+  return color;
 }
 
 //-----------------------------------------------------------------------------
@@ -134,7 +137,8 @@ vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view,
     double      t;
     if (!intersect(_ray, object, point, normal, t))
     {
-      color = 2*color-color*color; //TO MODIFY
+      color += _light.color * (_material.diffuse*dot(_normal,_ray.direction) 
+               + _material.specular*pow(dot(reflect(_ray.direction, _normal),_view), _material.shininess)); //TO MODIFY
     }
   }
   /* You can look at the classes `Light` and `Material` to check their attributes. Feel free to use
