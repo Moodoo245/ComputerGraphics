@@ -51,5 +51,9 @@ intersect(const Ray&  _ray,
     _intersection_point  = _ray(_intersection_t);
     _intersection_normal = (_intersection_point - center-dot(_intersection_point - center,axis)*axis) / radius;
 
+    if (dot(_intersection_normal, _ray.direction) > 0) {
+        _intersection_normal = - _intersection_normal;
+    }
+
     return true;
 }
