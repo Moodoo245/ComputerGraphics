@@ -107,6 +107,24 @@ bool Mesh::read(const std::string &_filename)
     return true;
 }
 
+//-----------------------------------------------------------------------------
+
+// Determine the weights by which to scale triangle (p0, p1, p2)'s normal when
+// accumulating the vertex normals for vertices 0, 1, and 2.
+// (Recall, vertex normals are a weighted average of their incident triangles'
+// normals, and in our raytracer we'll use the incident angles as weights.)
+// \param[in] p0, p1, p2    triangle vertex positions
+// \param[out] w0, w1, w2    weights to be used for vertices 0, 1, and 2
+void angleWeights(const vec3 &p0, const vec3 &p1, const vec3 &p2,
+                  double &w0, double &w1, double &w2) {
+    // compute angle weights
+    const vec3 e01 = normalize(p1-p0);
+    const vec3 e12 = normalize(p2-p1);
+    const vec3 e20 = normalize(p0-p2);
+    w0 = acos( std::max(-1.0, std::min(1.0, dot(e01, -e20) )));
+    w1 = acos( std::max(-1.0, std::min(1.0, dot(e12, -e01) )));
+    w2 = acos( std::max(-1.0, std::min(1.0, dot(e20, -e12) )));
+}
 
 //-----------------------------------------------------------------------------
 
@@ -128,6 +146,14 @@ void Mesh::compute_normals()
         v.normal = vec3(0,0,0);
     }
 
+    /** \todo
+     * In some scenes (e.g the office scene) some objects should be flat
+     * shaded (e.g. the desk) while other objects should be Phong shaded to appear
+     * realistic (e.g. chairs). You have to implement the following:
+     * - Compute vertex normals by averaging the normals of their incident triangles.
+     * - Store the vertex normals in the Vertex::normal member variable.
+     * - Weigh the normals by their triangles' angles.
+     */
 }
 
 
@@ -153,6 +179,15 @@ void Mesh::compute_bounding_box()
 bool Mesh::intersect_bounding_box(const Ray& _ray) const
 {
 
+    /** \todo
+    * Intersect the ray `_ray` with the axis-aligned bounding box of the mesh.
+    * Note that the minimum and maximum point of the bounding box are stored
+    * in the member variables `bb_min_` and `bb_max_`. Return whether the ray
+    * intersects the bounding box.
+    * This function is ued in `Mesh::intersect()` to avoid the intersection test
+    * with all triangles of every mesh in the scene. The bounding boxes are computed
+    * in `Mesh::compute_bounding_box()`.
+    */
 
     return true;
 }
@@ -213,6 +248,19 @@ intersect_triangle(const Triangle&  _triangle,
     const vec3& p1 = vertices_[_triangle.i1].position;
     const vec3& p2 = vertices_[_triangle.i2].position;
 
+    /** \todo
+    * - intersect _ray with _triangle
+    * - store intersection point in `_intersection_point`
+    * - store ray parameter in `_intersection_t`
+    * - store normal at intersection point in `_intersection_normal`.
+    * - Depending on the member variable `draw_mode_`, use either the triangle
+    *  normal (`Triangle::normal`) or interpolate the vertex normals (`Vertex::normal`).
+    * - return `true` if there is an intersection with t > 0 (in front of the viewer)
+    *
+    * Hint: Rearrange `ray.origin + t*ray.dir = a*p0 + b*p1 + (1-a-b)*p2` to obtain a solvable
+    * system for a, b and t.
+    * Refer to [Cramer's Rule](https://en.wikipedia.org/wiki/Cramer%27s_rule) to easily solve it.
+     */
 
     return false;
 }
