@@ -129,17 +129,6 @@ void angleWeights(const vec3 &p0, const vec3 &p1, const vec3 &p2,
   //-----------------------------------------------------------------------------
 
 
-<<<<<<< HEAD
-  void Mesh::compute_normals()
-  {
-    // compute triangle normals
-    for (Triangle& t: triangles_)
-    {
-      const vec3& p0 = vertices_[t.i0].position;
-      const vec3& p1 = vertices_[t.i1].position;
-      const vec3& p2 = vertices_[t.i2].position;
-      t.normal = normalize(cross(p1-p0, p2-p0));
-=======
 void Mesh::compute_normals()
 {
     // initialize vertex normals to zero
@@ -156,22 +145,18 @@ void Mesh::compute_normals()
         const vec3& p2 = vertices_[t.i2].position;
         t.normal = normalize(cross(p1-p0, p2-p0));
         // calculate triangle contribution in angleweigths to all the vertices
-        w0, w1, w2 = angleWeights(p0, p1, p2);
+        double w0, w1, w2;
+        angleWeights(p0, p1, p2, w0, w1, w2);
         // compute the normals of the vertices
-        p0.normal = p0.normal + w0*t.normal;
-        p1.normal = p1.normal + w1*t.normal;
-        p2.normal = p2.normal + w2*t.normal;
->>>>>>> e5e64a80b8f88c518f2522d2b857df3a59989dc8
+        vertices_[t.i0].normal += w0*t.normal;
+        vertices_[t.i1].normal += w1*t.normal;
+        vertices_[t.i2].normal += w2*t.normal;
     }
 
     // normalize the normals of the vertices
     for (Vertex& v: vertices_)
     {
-<<<<<<< HEAD
-      v.normal = vec3(0,0,0);
-=======
         v.normal = normalize(v.normal);
->>>>>>> e5e64a80b8f88c518f2522d2b857df3a59989dc8
     }
 
     /** \todo
@@ -300,10 +285,10 @@ void Mesh::compute_normals()
           if(t>0){
 
             vec3 x = _ray(t);
-            vec3 area = cross(p1-p0,p2-p0);
-            double a = cross(p1-x,p2-x)/area;
-            double b = cross(x-p0,p2-p0)/area;
-            double c = cross(p1-p0, x-p0)/area;
+            double area = norm(cross(p1-p0,p2-p0));
+            double a = norm(cross(p1-x,p2-x))/area;
+            double b = norm(cross(x-p0,p2-p0))/area;
+            double c = norm(cross(p1-p0, x-p0))/area;
 
             //check if the intersection is inside triangle
             if(a >= 0 && b >= 0 && c >= 0){
