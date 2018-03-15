@@ -24,6 +24,9 @@ Using the Computer Graphics course theory slides here is how we solved each foll
       intersection point and direction = reflect of the old ray. We add a small amount to the origin point so
       that we wouldn't have the 'acne' which was described in the slides.
 
+#### Note: 
+We do not check if the shadow ray and obstacles happen or not. Will update in future
+
 
 Collaborators and percentage of workload:
 Håvard Bjørnøy (33%)
