@@ -285,16 +285,30 @@ void Mesh::compute_normals()
           if(t>0){
 
             vec3 x = _ray(t);
-            double area = norm(cross(p1-p0,p2-p0));
-            double a = norm(cross(p1-x,p2-x))/area;
-            double b = norm(cross(x-p0,p2-p0))/area;
-            double c = norm(cross(p1-p0, x-p0))/area;
+            vec3 area = cross(p1-p0,p2-p0);
+            vec3 a = cross(p1-x,p2-x);
+            vec3 b = cross(x-p0,p2-p0);
+            vec3 c = cross(p1-p0, x-p0);
+
+
 
             //check if the intersection is inside triangle
-            if(a >= 0 && b >= 0 && c >= 0){
+            if(dot(a, area) >= 0 && dot(b, area) >= 0 && dot(c, area) >= 0){
               _intersection_t = t;
               _intersection_point = x;
-              _intersection_normal = normal;
+              if(draw_mode_ == FLAT){
+                _intersection_normal = normal;
+              }else{
+                const double norm_area = norm(area);
+
+                _intersection_normal = (norm(a)/norm_area)*vertices_[_triangle.i0].normal +
+                                      (norm(b)/norm_area)*vertices_[_triangle.i1].normal +
+                                      (norm(c)/norm_area)*vertices_[_triangle.i2].normal;
+              }
+              if(dot(_ray.direction, _intersection_normal) > 0){
+                _intersection_normal = -_intersection_normal;
+              }
+
               return true;
             }
           }

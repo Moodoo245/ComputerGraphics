@@ -140,8 +140,7 @@ vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view,
     if (!(intersect(_ray, object, point, normal, t) &&
     (distance(_ray.origin, _light.position) > distance(_ray.origin, point))))
     {
-      color += _light.color * (_material.diffuse*dot(_normal,_ray.direction)
-               + _material.specular*pow(dot(reflect(_ray.direction, _normal),_view), _material.shininess)); //TO MODIFY
+      color += _light.color * (_material.diffuse*dot(_normal,_ray.direction) + _material.specular*pow(dot(reflect(-_ray.direction, _normal),_view), _material.shininess)); //TO MODIFY
     }
   }
   /* You can look at the classes `Light` and `Material` to check their attributes. Feel free to use
