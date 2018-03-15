@@ -136,9 +136,10 @@ vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view,
     vec3        point;
     vec3        normal;
     double      t;
-    if (!intersect(_ray, object, point, normal, t))
+
+    if (!(intersect(_ray, object, point, normal, t) && (distance(_ray.origin, _light.position) > distance(_ray.origin, point))))
     {
-      color += _light.color * (_material.diffuse*dot(_normal,_ray.direction) 
+      color += _light.color * (_material.diffuse*dot(_normal,_ray.direction)
                + _material.specular*pow(dot(reflect(_ray.direction, _normal),_view), _material.shininess)); //TO MODIFY
     }
   }
