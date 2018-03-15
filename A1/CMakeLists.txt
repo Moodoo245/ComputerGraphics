@@ -1,6 +1,8 @@
 project(RayTracing)
 cmake_minimum_required(VERSION 2.6.4)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 # set output paths
 set(PROJECT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
@@ -18,6 +20,14 @@ if(OPENMP_FOUND)
       add_definitions(/arch:SSE)
     endif(MSVC)
     set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -fopenmp)
+endif()
+
+# try to find TBB for parallelization
+find_package(TBB)
+if (TBB_FOUND)
+    add_definitions(-DHAS_TBB)
+    include_directories(${TBB_INCLUDE_DIRS})
+    link_libraries(${TBB_LIBRARIES})
 endif()
 
 # compiler flags

@@ -71,6 +71,10 @@ public:
 
     size_t numObjects() const { return objects.size(); }
 
+    // Accessors for scene objects and camera for debugging.
+    const std::vector<std::unique_ptr<Object>> &getObjects() const { return objects; }
+    const Camera &getCamera() const { return camera; }
+
 private:
     /// camera stores eye position, view direction, and can generate primary rays
     Camera camera;
