@@ -131,6 +131,12 @@ void angleWeights(const vec3 &p0, const vec3 &p1, const vec3 &p2,
 
 void Mesh::compute_normals()
 {
+    // initialize vertex normals to zero
+    for (Vertex& v: vertices_)
+    {
+        v.normal = vec3(0,0,0);
+    }
+
     // compute triangle normals
     for (Triangle& t: triangles_)
     {
@@ -138,12 +144,18 @@ void Mesh::compute_normals()
         const vec3& p1 = vertices_[t.i1].position;
         const vec3& p2 = vertices_[t.i2].position;
         t.normal = normalize(cross(p1-p0, p2-p0));
+        // calculate triangle contribution in angleweigths to all the vertices
+        w0, w1, w2 = angleWeights(p0, p1, p2);
+        // compute the normals of the vertices
+        p0.normal = p0.normal + w0*t.normal;
+        p1.normal = p1.normal + w1*t.normal;
+        p2.normal = p2.normal + w2*t.normal;
     }
 
-    // initialize vertex normals to zero
+    // normalize the normals of the vertices
     for (Vertex& v: vertices_)
     {
-        v.normal = vec3(0,0,0);
+        v.normal = normalize(v.normal);
     }
 
     /** \todo
