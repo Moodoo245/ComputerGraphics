@@ -201,7 +201,7 @@ void Mesh::compute_normals()
     * with all triangles of every mesh in the scene. The bounding boxes are computed
     * in `Mesh::compute_bounding_box()`.
     */
-	
+
     double tmin = 0;
     double tmax = std::numeric_limits<double>::max();
 
@@ -209,7 +209,7 @@ void Mesh::compute_normals()
         if(_ray.direction[i] == 0.0){ if(bb_min_[i] > _ray.origin[i] || bb_max_[i] < _ray.origin[i]) return false;}
         else if(_ray.direction[i] > 0){
             tmin = std::max(tmin, (bb_min_[i] - _ray.origin[i])/_ray.direction[i]);
-            tmax = std::min(tmax, (bb_max_[i] - _ray.origin[i])/_ray.direction[i]);    
+            tmax = std::min(tmax, (bb_max_[i] - _ray.origin[i])/_ray.direction[i]);
         }
         else{
             tmax = std::min(tmax, (bb_min_[i] - _ray.origin[i])/_ray.direction[i]);
@@ -316,9 +316,9 @@ void Mesh::compute_normals()
               }else{
                 const double norm_area = norm(area);
 
-                _intersection_normal = (norm(a)/norm_area)*vertices_[_triangle.i0].normal +
+                _intersection_normal = normalize((norm(a)/norm_area)*vertices_[_triangle.i0].normal +
                                       (norm(b)/norm_area)*vertices_[_triangle.i1].normal +
-                                      (norm(c)/norm_area)*vertices_[_triangle.i2].normal;
+                                      (norm(c)/norm_area)*vertices_[_triangle.i2].normal);
               }
               if(dot(_ray.direction, _intersection_normal) > 0){
                 _intersection_normal = -_intersection_normal;
