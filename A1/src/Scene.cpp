@@ -81,7 +81,7 @@ vec3 Scene::trace(const Ray& _ray, int _depth)
   // check if the material is mirrorlike
   double a = object -> material.mirror;
 
-  if(a != 0 && (_depth < max_depth)){
+  if( a != 0 && (_depth < max_depth)){
     vec3 reflected_color = vec3(0,0,0);
     //generate reflected ray, compute its color contribution, and mix it with
     //the color computed by local Phong lighting
@@ -131,16 +131,16 @@ vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view,
   * - only add diffuse and specular light if object is not in shadow */
   for (Light _light : lights)
   {
-    Ray _ray = Ray(_point + 1e-6 * _normal, _light.position - _point);
+    Ray _ray = Ray(_point + 1e-12 * _normal, _light.position - _point);
     Object_ptr  object;
     vec3        point;
     vec3        normal;
     double      t;
 
-    if (!(intersect(_ray, object, point, normal, t) &&
+    if ( !(intersect(_ray, object, point, normal, t) &&
     (distance(_ray.origin, _light.position) > distance(_ray.origin, point))))
     {
-      color += _light.color * (_material.diffuse*dot(_normal,_ray.direction) + _material.specular*pow(dot(mirror(_ray.direction, _normal),_view), _material.shininess)); //TO MODIFY
+      color += _light.color * (_material.diffuse*std::max(dot(_normal,_ray.direction),0.0) + _material.specular*pow(std::max(0.0,dot(mirror(_ray.direction, _normal),_view)), _material.shininess)); //TO MODIFY
     }
   }
   /* You can look at the classes `Light` and `Material` to check their attributes. Feel free to use
