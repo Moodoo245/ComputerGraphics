@@ -197,11 +197,26 @@ void Mesh::compute_normals()
     * Note that the minimum and maximum point of the bounding box are stored
     * in the member variables `bb_min_` and `bb_max_`. Return whether the ray
     * intersects the bounding box.
-    * This function is ued in `Mesh::intersect()` to avoid the intersection test
+    * This function is used in `Mesh::intersect()` to avoid the intersection test
     * with all triangles of every mesh in the scene. The bounding boxes are computed
     * in `Mesh::compute_bounding_box()`.
     */
+	
+    double tmin = 0;
+    double tmax = std::numeric_limits<double>::max();
 
+    for(int i = 0; i<3; ++i){
+        if(_ray.direction[i] == 0.0){ if(bb_min_[i] > _ray.origin[i] || bb_max_[i] < _ray.origin[i]) return false;}
+        else if(_ray.direction[i] > 0){
+            tmin = std::max(tmin, (bb_min_[i] - _ray.origin[i])/_ray.direction[i]);
+            tmax = std::min(tmax, (bb_max_[i] - _ray.origin[i])/_ray.direction[i]);    
+        }
+        else{
+            tmax = std::min(tmax, (bb_min_[i] - _ray.origin[i])/_ray.direction[i]);
+            tmin = std::max(tmin, (bb_max_[i] - _ray.origin[i])/_ray.direction[i]);
+        }
+        if(tmin > tmax) return false;
+    }
     return true;
   }
 
@@ -329,4 +344,4 @@ void Mesh::compute_normals()
       }
 
 
-      //=============================================================================
+      //=============================================================================)
