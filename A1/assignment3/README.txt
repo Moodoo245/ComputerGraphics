@@ -10,18 +10,13 @@ We first initialise the vertices so we can calculate the the vertices normal whi
 
 
     Ray-Triangle intersection:
-      We find the intersection in 2step process. First we simplify the triangle by perceiving it just as if it
-      was a plane, for this we take any point of the 3 points of the triangle and the norm of the triangle.
+We find the intersection in 2step process. First we simplify the triangle by perceiving it just as if it was a plane, for this we take any point of the 3 points of the triangle and the norm of the triangle.
 
-      After this we already have the t, the normal of the intersection and most importantly the point of
-      the intersection.
+After this we already have the t, the normal of the intersection and most importantly the point of the intersection.
 
-      Now we do the 2nd step where as shown in the course, by calculating the areas of the triangle between the
-      intersection point, we find the Barycentric coordinates i.e. a,b,c. If any of these are 0, it means our
-      intersection point is not in the triangle else we intersected with the triangle.
+Now we do the 2nd step where as shown in the course, by calculating the areas of the triangle between the intersection point, we find the Barycentric coordinates i.e. a,b,c. If any of these are 0, it means our intersection point is not in the triangle else we intersected with the triangle.
 
-      Finally as asked we check the draw_mode_ to select which shading to apply i.e. which normal we return
-      for the specific point.
+Finally as asked we check the draw_mode_ to select which shading to apply i.e. which normal we return for the specific point.
 
 
 
