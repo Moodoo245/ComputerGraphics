@@ -5,6 +5,9 @@ GROUP: 24
 
 Using the Computer Graphics course theory slides here is how we solved each following problem:
 
+    Compute normals:
+We first initialise the vertices so we can calculate the the vertices normal while looping through the triangles. By adding that one triangles normal contribution to the corner vertices with the angle weight. This way we only iterate through every triangle once. Afterwards we iterate through the vertices to normalize them.
+
 
     Ray-Triangle intersection:
       We find the intersection in 2step process. First we simplify the triangle by perceiving it just as if it
@@ -27,6 +30,6 @@ We look at the legal values of parameter t for which the ray point origin+t*dire
 
 
 Collaborators and percentage of workload:
-Håvard Bjørnøy
-Justinas Sukaitis
-Sebastien Chevaleyre
+Håvard Bjørnøy 33%
+Justinas Sukaitis 34%
+Sebastien Chevaleyre 33%

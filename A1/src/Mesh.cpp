@@ -15,6 +15,7 @@
 #include <string>
 #include <stdexcept>
 #include <limits>
+#include <cmath>
 
 
 //== IMPLEMENTATION ===========================================================
