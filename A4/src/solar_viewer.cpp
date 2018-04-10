@@ -88,6 +88,20 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
+			case GLFW_KEY_8:
+			{
+				dist_factor_ -= 1.0;
+				dist_factor_ = static_cast<float>(fmax(dist_factor_, -2.5));
+				break;
+			}
+
+			case GLFW_KEY_9:
+			{
+				dist_factor_ += 1.0;
+				dist_factor_ = static_cast<float>(fmin(dist_factor_, 20.0));
+				break;
+			}
+
             /** \todo Implement the ability to change the viewer's distance to the celestial body.
              *    - key 9 should increase and key 8 should decrease the `dist_factor_`
              *    - 2.5 < `dist_factor_` < 20.0
@@ -191,16 +205,25 @@ keyboard(int key, int scancode, int action, int mods)
 // around their orbits. This position is needed to set up the camera in the scene
 // (see Solar_viewer::paint)
 void Solar_viewer::update_body_positions() {
-	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &earth_, &mars_};
+    /** \todo Update the position of the planets based on their distance to their orbit's center
+     * and their angular displacement around the orbit. Planets should follow a circular
+     * orbit in the x-z plane, moving in a clockwise direction around the
+     * positive y axis. "angle_orbit_ = 0" should correspond to a position on the x axis.
+     * Note: planets will orbit around the sun, which is always positioned at the origin,
+     *       but the moon orbits around the earth! Only visualize mercury, venus, earth, mars,
+     *       and earth's moon. Do not explicitly place the space ship, it's position
+     *       is fixed for now.
+     * */
+	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &earth_, &mars_ };
 	for (int i = 0; i < 4; i++) {
 		bodies[i]->pos_ = vec4(bodies[i]->distance_*cos(bodies[i]->angle_orbit_),
 			bodies[i]->pos_.y,
 			bodies[i]->distance_*(-sin(bodies[i]->angle_orbit_)),
 			bodies[i]->pos_.w);
 	}
-	moon_.pos_ = vec4(earth_.pos_ + moon_.distance_*cos(moon.angle_orbit_),
+	moon_.pos_ = vec4(earth_.pos_.x + moon_.distance_*cos(moon_.angle_orbit_),
 		moon_.pos_.y,
-		earth_.pos_ + moon_.distance_*(-sin(moon.angle_orbit_)),
+		earth_.pos_.z + moon_.distance_*(-sin(moon_.angle_orbit_)),
 		moon_.pos_.w);
 }
 
@@ -291,48 +314,47 @@ void Solar_viewer::initialize()
 
 void Solar_viewer::paint()
 {
-    // clear framebuffer and depth buffer first
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// clear framebuffer and depth buffer first
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /** \todo Implement navigation through the solar system.
-     *   - Allow camera rotation by modifying the view matrix.
-     *     `x_angle_` and `y_angle` hold the necessary information and are
-     *     updated by key presses (see `Solar_viewer::keyboard(...)`).
-     *   - Position the camera at distance `dist_factor_` from the planet's center (in units of planet radii).
-     *     This distance should be controlled by keys 8 and 9.
-     *   - When keys `1` to `6` are pressed, the camera should move to look at
-     *     the corresponding celestial body (this functionality is already provided,
-     *     see `Solar_viewer::keyboard(...)`).
-     *   - Pointer `planet_to_look_at_` stores the current body to view.
-     *   - When you are in spaceship mode (member in_ship_), the camera should
-     *     hover slightly behind and above the ship and rotate along with it (so that
-     *     when the ship moves and turns it always remains stationary in view
-     *     while the solar system moves and spins around it).
-     *
-     *  Hint: planet centers are stored in "Planet::pos_".
-     */
-    // For now, view the sun from a fixed position...
-    std::cout << x_angle_ << std::endl;
+	/** \todo Implement navigation through the solar system.
+	*   - Allow camera rotation by modifying the view matrix.
+	*     `x_angle_` and `y_angle` hold the necessary information and are
+	*     updated by key presses (see `Solar_viewer::keyboard(...)`).
+	*   - Position the camera at distance `dist_factor_` from the planet's center (in units of planet radii).
+	*     This distance should be controlled by keys 8 and 9.
+	*   - When keys `1` to `6` are pressed, the camera should move to look at
+	*     the corresponding celestial body (this functionality is already provided,
+	*     see `Solar_viewer::keyboard(...)`).
+	*   - Pointer `planet_to_look_at_` stores the current body to view.
+	*   - When you are in spaceship mode (member in_ship_), the camera should
+	*     hover slightly behind and above the ship and rotate along with it (so that
+	*     when the ship moves and turns it always remains stationary in view
+	*     while the solar system moves and spins around it).
+	*
+	*  Hint: planet centers are stored in "Planet::pos_".
+	*/
+	// For now, view the sun from a fixed position...
+	std::cout << x_angle_ << std::endl;
 
-    // initializationg
-    vec4     eye = vec4(0,0,7,1.0);
-    vec4  center = sun_.pos_;
-    vec4      up = vec4(0,1,0,0);
+	// initializationg
+	vec4     eye = vec4(0, 0, dist_factor_, 1.0);
+	vec4  center = sun_.pos_;
+	vec4      up = vec4(0, 1, 0, 0);
 
-    // rotate eye around object by angles into correct position
-    vec4 new_eye = mat4::rotate_x(x_angle_)*eye;
-    new_eye = mat4::rotate_y(y_angle_)*new_eye;
+	// rotate eye around object by angles into correct position
+	vec4 new_eye = mat4::rotate_x(x_angle_)*eye;
+	new_eye = mat4::rotate_y(y_angle_)*new_eye;
 
 
-    float radius = sun_.radius_;
+	float radius = sun_.radius_;
 
-    mat4    view = mat4::look_at(vec3(new_eye), vec3(center), vec3(up));
+	mat4    view = mat4::look_at(vec3(new_eye), vec3(center), vec3(up));
 
-    billboard_x_angle_ = billboard_y_angle_ = 0.0f;
+	billboard_x_angle_ = billboard_y_angle_ = 0.0f;
 
-    mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
-    draw_scene(projection, view);
-
+	mat4 projection = mat4::perspective(fovy_, (float)width_ / (float)height_, near_, far_);
+	draw_scene(projection, view);
 }
 
 
