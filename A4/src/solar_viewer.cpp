@@ -216,6 +216,7 @@ void Solar_viewer::update_body_positions() {
      * */
 	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &earth_, &mars_ };
 	for (int i = 0; i < 4; i++) {
+		
 		bodies[i]->pos_ = vec4(bodies[i]->distance_*cos(bodies[i]->angle_orbit_),
 			bodies[i]->pos_.y,
 			bodies[i]->distance_*(-sin(bodies[i]->angle_orbit_)),
@@ -339,7 +340,7 @@ void Solar_viewer::paint()
 
 	// initializationg
 	vec4     eye = vec4(0, 0, dist_factor_, 1.0);
-	vec4  center = sun_.pos_;
+	vec4  center = planet_to_look_at_->pos_;
 	vec4      up = vec4(0, 1, 0, 0);
 
 	// rotate eye around object by angles into correct position
@@ -388,8 +389,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     sun_shader_.set_uniform("tex", 0);
     sun_shader_.set_uniform("greyscale", (int)greyscale_);
     sun_.tex_.bind();
+	
     unit_sphere_.draw();
-
+	
     /** \todo Render the star background, the spaceship, and the rest of the celestial bodies.
      *  For now, everything should be rendered with the color_shader_,
      *  which expects uniforms "modelview_projection_matrix", "tex" and "grayscale"
