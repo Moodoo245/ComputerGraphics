@@ -337,6 +337,13 @@ void Solar_viewer::paint()
      */
     // For now, view the sun from a fixed position...
 
+    // if in_ship then orient it right above and behind
+    // vec4     eye = vec4(0,0.01, 0.05, 1.0)
+    // vec4  center = Ship.pos_;
+    // vec4      up = vec4(0,1,0,0);
+    // vec4 new_eye = mat4::rotate_x(Ship.angle_)*eye;
+    // new_eye = mat4::translate(vec3(center))*new_eye;
+
     // initializationg
     vec4     eye = vec4(0,0,dist_factor_*planet_to_look_at_->radius_,1.0);
     vec4  center = planet_to_look_at_->pos_;
