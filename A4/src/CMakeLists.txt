@@ -1,8 +1,6 @@
-
 # OpenGL & GLEW library
 find_package(OpenGL)
 ADD_DEFINITIONS(-DGLEW_STATIC)
-include_directories(${CMAKE_SOURCE_DIR}/lib/glew)
 
 # source files
 file(GLOB SOURCES ./*.cpp)
@@ -17,4 +15,6 @@ add_definitions("-DSHADER_PATH=\"${SHADER_PATH}\"")
 
 # executable
 add_executable(SolarSystem ${HEADERS} ${SOURCES})
-target_link_libraries(SolarSystem glew glfw lodePNG ${OPENGL_LIBRARIES})
+target_include_directories(SolarSystem SYSTEM PUBLIC ${GLEW_INCLUDE_DIRS})
+# Note: target_link_libraries(glfw) should actually bring in the necessary header files.
+target_link_libraries(SolarSystem lodePNG glfw ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})

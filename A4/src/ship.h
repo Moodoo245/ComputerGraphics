@@ -47,15 +47,15 @@ class Ship
         unsigned int n_indices_;
 
         // vertex array object
-        GLuint vao_;
+        GLuint vao_ = 0;
         /// vertex buffer object
-        GLuint vbo_;
+        GLuint vbo_ = 0;
         /// texture coordinates buffer object
-        GLuint tbo_;
+        GLuint tbo_ = 0;
         /// normals buffer object
-        GLuint nbo_;
+        GLuint nbo_ = 0;
         /// index buffer object
-        GLuint ibo_;
+        GLuint ibo_ = 0;
 
 
 
@@ -75,7 +75,7 @@ class Ship
         /// current angular speed (angle_ += angular_speed)
         float angular_speed_;
 
-        /// ships radius
+        /// ship's radius
         float radius_;
 };
 

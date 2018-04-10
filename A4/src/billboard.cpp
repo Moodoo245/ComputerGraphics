@@ -6,6 +6,14 @@
 #include <cassert>
 #include <algorithm>
 
+Billboard::~Billboard() {
+    if (vbo_)  glDeleteBuffers(1, &vbo_);
+    if (nbo_)  glDeleteBuffers(1, &nbo_);
+    if (tbo_)  glDeleteBuffers(1, &tbo_);
+    if (ibo_)  glDeleteBuffers(1, &ibo_);
+    if (vao_)  glDeleteVertexArrays(1, &vao_);
+}
+
 void Billboard::draw()
 {
     if (n_indices_ == 0) initialize();

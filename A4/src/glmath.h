@@ -81,7 +81,7 @@ public:
     vec3() {}
 
     /// construct with scalar value that is assigned to x, y, and z
-    vec3(float _s) : x(_s), y(_s), z(_s) {}
+    explicit vec3(float _s) : x(_s), y(_s), z(_s) {}
 
     /// construct with x,y,z values
     vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
@@ -327,7 +327,7 @@ public:
     vec4() {}
 
     /// construct with scalar value that is assigned to x, y, z, w
-    vec4(float _s) : x(_s), y(_s), z(_s), w(_s) {}
+    explicit vec4(float _s) : x(_s), y(_s), z(_s), w(_s) {}
 
     /// construct with x,y,z,w values
     vec4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
@@ -514,7 +514,7 @@ public:
     mat3() {}
 
     /// construct matrix where all values are s
-    mat3(float s);
+    explicit mat3(float s);
 
     /// construct 3x3 matrix from the upper-left 3x3 part of a 4x4 matrix
     mat3(const mat4& m4);
@@ -563,7 +563,7 @@ public:
     /// default constructor
     mat4() {}
     /// construct matrix where all values are s
-    mat4(float s);
+    explicit mat4(float s);
 
     /// read/write access to element (i,j)
     float& operator()(const int i, const int j) { return data_[i+(j<<2)]; }

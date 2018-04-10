@@ -88,6 +88,11 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
+            /** \todo Implement the ability to change the viewer's distance to the celestial body.
+             *    - key 9 should increase and key 8 should decrease the `dist_factor_`
+             *    - 2.5 < `dist_factor_` < 20.0
+             */
+
             case GLFW_KEY_R:
             {
                 randomize_planets();
@@ -127,25 +132,25 @@ keyboard(int key, int scancode, int action, int mods)
 
             case GLFW_KEY_LEFT:
             {
-                y_angle_ += 10.0;
+                y_angle_ -= 10.0;
                 break;
             }
 
             case GLFW_KEY_RIGHT:
             {
-                y_angle_ -= 10.0;
+                y_angle_ += 10.0;
                 break;
             }
 
             case GLFW_KEY_DOWN:
             {
-                x_angle_ -= 10.0;
+                x_angle_ += 10.0;
                 break;
             }
 
             case GLFW_KEY_UP:
             {
-                x_angle_ += 10.0;
+                x_angle_ -= 10.0;
                 break;
             }
 
@@ -186,6 +191,15 @@ keyboard(int key, int scancode, int action, int mods)
 // around their orbits. This position is needed to set up the camera in the scene
 // (see Solar_viewer::paint)
 void Solar_viewer::update_body_positions() {
+    /** \todo Update the position of the planets based on their distance to their orbit's center
+     * and their angular displacement around the orbit. Planets should follow a circular
+     * orbit in the x-z plane, moving in a clockwise direction around the
+     * positive y axis. "angle_orbit_ = 0" should correspond to a position on the x axis.
+     * Note: planets will orbit around the sun, which is always positioned at the origin,
+     *       but the moon orbits around the earth! Only visualize mercury, venus, earth, mars,
+     *       and earth's moon. Do not explicitly place the space ship, it's position
+     *       is fixed for now.
+     * */
 }
 
 //-----------------------------------------------------------------------------
@@ -278,12 +292,29 @@ void Solar_viewer::paint()
     // clear framebuffer and depth buffer first
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    /** \todo Implement navigation through the solar system.
+     *   - Allow camera rotation by modifying the view matrix.
+     *     `x_angle_` and `y_angle` hold the necessary information and are
+     *     updated by key presses (see `Solar_viewer::keyboard(...)`).
+     *   - Position the camera at distance `dist_factor_` from the planet's center (in units of planet radii).
+     *     This distance should be controlled by keys 8 and 9.
+     *   - When keys `1` to `6` are pressed, the camera should move to look at
+     *     the corresponding celestial body (this functionality is already provided,
+     *     see `Solar_viewer::keyboard(...)`).
+     *   - Pointer `planet_to_look_at_` stores the current body to view.
+     *   - When you are in spaceship mode (member in_ship_), the camera should
+     *     hover slightly behind and above the ship and rotate along with it (so that
+     *     when the ship moves and turns it always remains stationary in view
+     *     while the solar system moves and spins around it).
+     *
+     *  Hint: planet centers are stored in "Planet::pos_".
+     */
     // For now, view the sun from a fixed position...
     vec4     eye = vec4(0,0,7,1.0);
     vec4  center = sun_.pos_;
     vec4      up = vec4(0,1,0,0);
     float radius = sun_.radius_;
-    mat4    view = mat4::look_at(vec3(eye), (vec3)center, (vec3)up);
+    mat4    view = mat4::look_at(vec3(eye), vec3(center), vec3(up));
 
     billboard_x_angle_ = billboard_y_angle_ = 0.0f;
 
@@ -319,11 +350,31 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     sun_shader_.use();
     sun_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     sun_shader_.set_uniform("t", sun_animation_time, true /* Indicate that time parameter is optional;
-                                                             it may be optimized away by the GLSL compiler if it's unused. */);
+                                                             it may be optimized away by the GLSL    compiler if it's unused. */);
     sun_shader_.set_uniform("tex", 0);
     sun_shader_.set_uniform("greyscale", (int)greyscale_);
     sun_.tex_.bind();
     unit_sphere_.draw();
+
+    /** \todo Render the star background, the spaceship, and the rest of the celestial bodies.
+     *  For now, everything should be rendered with the color_shader_,
+     *  which expects uniforms "modelview_projection_matrix", "tex" and "grayscale"
+     *  and a single bound texture.
+     *
+     *  For each object, first compute the model matrix
+     *  (similarly to what you did in function update_body_positions()), model-view
+     *  matrix (use already computed _view) and model-view-projection matrix (use
+     *  already computed _projection).
+     *
+     *  Then set up the shader. Make use of the use() function defined in shader.cpp to
+     *  specify the handle of the shader program and set the uniform variables expected by
+     *  the shader.
+     *
+     *  Finally, bind the the texture (such that the sphere would be rendered with given
+     *  texture) and draw the sphere.
+     *
+     *  Hint: See how it is done for the Sun in the code above.
+     */
 
     // check for OpenGL errors
     glCheckError();

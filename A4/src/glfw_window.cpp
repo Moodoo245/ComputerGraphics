@@ -33,14 +33,24 @@ GLFW_window::GLFW_window(const char* _title, int _width, int _height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
-
     // try to create window
     window_ = glfwCreateWindow(_width, _height, _title, NULL, NULL);
-    if (!window_)
-    {
-        glfwTerminate();
+    if (!window_) {
         std::cerr << "Window creation failed!\n";
-        exit(EXIT_FAILURE);
+        std::cerr << "Attempting fall-back (for INF03 machines)" << std::endl;
+
+        // Request OpenGL version 3.1
+        // Note: below version 3.2, we must request GLFW_OPENGL_ANY_PROFILE
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        window_ = glfwCreateWindow(_width, _height, _title, NULL, NULL);
+
+	if (!window_) {
+            glfwTerminate();
+            std::cerr << "Window creation failed!\n";
+            exit(EXIT_FAILURE);
+	}
     }
 
 
@@ -144,6 +154,8 @@ void GLFW_window::keyboard__(GLFWwindow* window, int key, int scancode, int acti
 void GLFW_window::resize__(GLFWwindow* window, int width, int height)
 {
     instance__->resize(width, height);
+    instance__->paint();
+    glfwSwapBuffers(instance__->window_);
 }
 
 

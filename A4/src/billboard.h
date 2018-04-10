@@ -13,6 +13,8 @@ public:
     // Texture for billboard.
     Texture tex_;
 
+    ~Billboard();
+
 private:
     void initialize();
 
@@ -20,14 +22,14 @@ private:
     unsigned int n_indices_ = 0;
 
     // vertex array object
-    GLuint vao_;
+    GLuint vao_ = 0;
     /// vertex buffer object
-    GLuint vbo_;
-    GLuint nbo_;
+    GLuint vbo_ = 0;
+    GLuint nbo_ = 0;
     /// texture coordinates buffer object
-    GLuint tbo_;
+    GLuint tbo_ = 0;
     /// index buffer object
-    GLuint ibo_;
+    GLuint ibo_ = 0;
 };
 
 #endif

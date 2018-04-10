@@ -15,16 +15,8 @@
 //=============================================================================
 
 
-Sphere::Sphere(unsigned int resolution) :
-    resolution_(resolution),
-    n_indices_(0),
-    vao_(0),
-    vbo_(0),
-    nbo_(0),
-    tan_bo_(0),
-    bitan_bo_(0),
-    tbo_(0),
-    ibo_(0)
+Sphere::Sphere(unsigned int resolution)
+    : resolution_(resolution)
 {
 }
 
