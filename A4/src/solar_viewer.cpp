@@ -191,15 +191,17 @@ keyboard(int key, int scancode, int action, int mods)
 // around their orbits. This position is needed to set up the camera in the scene
 // (see Solar_viewer::paint)
 void Solar_viewer::update_body_positions() {
-    /** \todo Update the position of the planets based on their distance to their orbit's center
-     * and their angular displacement around the orbit. Planets should follow a circular
-     * orbit in the x-z plane, moving in a clockwise direction around the
-     * positive y axis. "angle_orbit_ = 0" should correspond to a position on the x axis.
-     * Note: planets will orbit around the sun, which is always positioned at the origin,
-     *       but the moon orbits around the earth! Only visualize mercury, venus, earth, mars,
-     *       and earth's moon. Do not explicitly place the space ship, it's position
-     *       is fixed for now.
-     * */
+	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &earth_, &mars_};
+	for (int i = 0; i < 4; i++) {
+		bodies[i]->pos_ = vec4(bodies[i]->distance_*cos(bodies[i]->angle_orbit_),
+			bodies[i]->pos_.y,
+			bodies[i]->distance_*(-sin(bodies[i]->angle_orbit_)),
+			bodies[i]->pos_.w);
+	}
+	moon_.pos_ = vec4(earth_.pos_ + moon_.distance_*cos(moon.angle_orbit_),
+		moon_.pos_.y,
+		earth_.pos_ + moon_.distance_*(-sin(moon.angle_orbit_)),
+		moon_.pos_.w);
 }
 
 //-----------------------------------------------------------------------------
