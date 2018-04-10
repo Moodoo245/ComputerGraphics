@@ -88,6 +88,20 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
+            case GLFW_KEY_8:
+            {
+              dist_factor_ -= 1.0;
+              dist_factor_ = fmax(dist_factor_, -2.5);
+              break;
+            }
+
+            case GLFW_KEY_9:
+            {
+              dist_factor_ += 1.0;
+              dist_factor_ = fmin(dist_factor_, 20.0);
+              break;
+            }
+
             /** \todo Implement the ability to change the viewer's distance to the celestial body.
              *    - key 9 should increase and key 8 should decrease the `dist_factor_`
              *    - 2.5 < `dist_factor_` < 20.0
@@ -310,19 +324,17 @@ void Solar_viewer::paint()
      *  Hint: planet centers are stored in "Planet::pos_".
      */
     // For now, view the sun from a fixed position...
-    std::cout << x_angle_ << std::endl;
 
     // initializationg
-    vec4     eye = vec4(0,0,7,1.0);
-    vec4  center = sun_.pos_;
+    vec4     eye = vec4(0,0,dist_factor_*planet_to_look_at_->radius_,1.0);
+    vec4  center = planet_to_look_at_->pos_;
     vec4      up = vec4(0,1,0,0);
 
-    // rotate eye around object by angles into correct position
+    // rotate in x and y around origin
     vec4 new_eye = mat4::rotate_x(x_angle_)*eye;
     new_eye = mat4::rotate_y(y_angle_)*new_eye;
-
-
-    float radius = sun_.radius_;
+    // translate with respect to the object
+    new_eye = mat4::translate(vec3(center))*new_eye;
 
     mat4    view = mat4::look_at(vec3(new_eye), vec3(center), vec3(up));
 
