@@ -88,19 +88,19 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
-            case GLFW_KEY_8:
-            {
-              dist_factor_ -= 1.0;
-              dist_factor_ = fmax(dist_factor_, -2.5);
-              break;
-            }
+      			case GLFW_KEY_8:
+      			{
+      				dist_factor_ -= 1.0;
+      				dist_factor_ = static_cast<float>(fmax(dist_factor_, -2.5));
+      				break;
+      			}
 
-            case GLFW_KEY_9:
-            {
-              dist_factor_ += 1.0;
-              dist_factor_ = fmin(dist_factor_, 20.0);
-              break;
-            }
+      			case GLFW_KEY_9:
+      			{
+      				dist_factor_ += 1.0;
+      				dist_factor_ = static_cast<float>(fmin(dist_factor_, 20.0));
+      				break;
+      			}
 
             /** \todo Implement the ability to change the viewer's distance to the celestial body.
              *    - key 9 should increase and key 8 should decrease the `dist_factor_`
@@ -214,6 +214,18 @@ void Solar_viewer::update_body_positions() {
      *       and earth's moon. Do not explicitly place the space ship, it's position
      *       is fixed for now.
      * */
+	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &earth_, &mars_ };
+	for (int i = 0; i < 4; i++) {
+		
+		bodies[i]->pos_ = vec4(bodies[i]->distance_*cos(bodies[i]->angle_orbit_),
+			bodies[i]->pos_.y,
+			bodies[i]->distance_*(-sin(bodies[i]->angle_orbit_)),
+			bodies[i]->pos_.w);
+	}
+	moon_.pos_ = vec4(earth_.pos_.x + moon_.distance_*cos(moon_.angle_orbit_),
+		moon_.pos_.y,
+		earth_.pos_.z + moon_.distance_*(-sin(moon_.angle_orbit_)),
+		moon_.pos_.w);
 }
 
 //-----------------------------------------------------------------------------
@@ -342,7 +354,6 @@ void Solar_viewer::paint()
 
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);
-
 }
 
 
@@ -376,8 +387,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     sun_shader_.set_uniform("tex", 0);
     sun_shader_.set_uniform("greyscale", (int)greyscale_);
     sun_.tex_.bind();
+	
     unit_sphere_.draw();
-
+	
     /** \todo Render the star background, the spaceship, and the rest of the celestial bodies.
      *  For now, everything should be rendered with the color_shader_,
      *  which expects uniforms "modelview_projection_matrix", "tex" and "grayscale"
