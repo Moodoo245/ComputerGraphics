@@ -88,19 +88,19 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
-      			case GLFW_KEY_8:
-      			{
-      				dist_factor_ -= 1.0;
-      				dist_factor_ = static_cast<float>(fmax(dist_factor_, -2.5));
-      				break;
-      			}
+  			case GLFW_KEY_8:
+  			{
+  				dist_factor_ -= 1.0;
+  				dist_factor_ = static_cast<float>(fmax(dist_factor_, -2.5));
+  				break;
+  			}
 
-      			case GLFW_KEY_9:
-      			{
-      				dist_factor_ += 1.0;
-      				dist_factor_ = static_cast<float>(fmin(dist_factor_, 20.0));
-      				break;
-      			}
+  			case GLFW_KEY_9:
+  			{
+  				dist_factor_ += 1.0;
+  				dist_factor_ = static_cast<float>(fmin(dist_factor_, 20.0));
+  				break;
+  			}
 
             /** \todo Implement the ability to change the viewer's distance to the celestial body.
              *    - key 9 should increase and key 8 should decrease the `dist_factor_`
@@ -337,21 +337,32 @@ void Solar_viewer::paint()
      */
     // For now, view the sun from a fixed position...
 
-    // if in_ship then orient it right above and behind
-    // vec4     eye = vec4(0,0.01, 0.05, 1.0)
-    // vec4  center = Ship.pos_;
-    // vec4      up = vec4(0,1,0,0);
-    // vec4 new_eye = mat4::rotate_x(Ship.angle_)*eye;
-    // new_eye = mat4::translate(vec3(center))*new_eye;
-
-    // initializationg
-    vec4     eye = vec4(0,0,dist_factor_*planet_to_look_at_->radius_,1.0);
-    vec4  center = planet_to_look_at_->pos_;
+    // common variables
     vec4      up = vec4(0,1,0,0);
+    vec4     eye;
+    vec4  center;
+    vec4 new_eye;
 
-    // rotate in x and y around origin
-    vec4 new_eye = mat4::rotate_x(x_angle_)*eye;
-    new_eye = mat4::rotate_y(y_angle_)*new_eye;
+    // the you are in the ship we must see everything in the perspective of the ship
+    if (in_ship_)
+    {
+        // initializating
+        eye = vec4(0,0.012, -0.05, 1.0);
+        center = ship_.pos_;
+        new_eye = mat4::rotate_y(ship_.angle_+y_angle_)*eye;
+
+    }
+    // else check which planet you're looking at
+    else
+    {
+        // initializating
+        eye = vec4(0,0,dist_factor_*planet_to_look_at_->radius_,1.0);
+        center = planet_to_look_at_->pos_;
+        // rotate in x and y around origin
+        new_eye = mat4::rotate_x(x_angle_)*eye;
+        new_eye = mat4::rotate_y(y_angle_)*new_eye;
+    }
+
     // translate with respect to the object
     new_eye = mat4::translate(vec3(center))*new_eye;
 
