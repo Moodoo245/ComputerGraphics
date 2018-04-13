@@ -12,6 +12,7 @@
 #include <cassert>
 #include <algorithm>
 #include "lodepng.h"
+#include <cmath>
 
 //=============================================================================
 
@@ -91,6 +92,22 @@ bool Texture::uploadImage(std::vector<unsigned char> &img, unsigned width, unsig
 
 //-----------------------------------------------------------------------------
 
+int calc_transparency(int row, int col, int width) {
+
+        float radius = sqrt(std::pow(std::abs(row - width/2),2) + std::pow(std::abs(col - width/2),2));
+        // scale between 0 and 1
+        radius -= 150;
+        int cutoff = 300; // hmmm.. in percentage maybe
+        if (radius < 0) return 255;
+        if (radius > 300) return 0;
+        //float exp_dist = exp(1-radius);
+        //exp_dist = exp_dist/(exp((width-300)/2));
+        radius = radius/((width-300)/2);
+
+
+        return std::floor((1-radius)*255);
+    }
+
 bool Texture::createSunBillboardTexture()
 {
     std::cout << "creating sun billboard " << "\n" << std::flush;
@@ -100,12 +117,20 @@ bool Texture::createSunBillboardTexture()
     int height = 900;
     img.resize(width*height * 4);
 
+    /** \todo Set up the texture for the sun billboard.
+    *   - Draw an opaque circle with a 150 pixel radius in its middle
+    *   - Outside that circle the texture should become more and more transparent to mimic a nice glow effect
+    *   - Make sure that your texture is fully transparent at its borders to avoid seeing visible edges
+    *   - Experiment with the color and with how fast you change the transparency until the effect satisfies you
+    **/
+
+
     for (int col = 0; col < width; ++col) {
         for (int row = 0; row < height; ++row) {
             img[(row * width + col) * 4 + 0] = 255; // R
-            img[(row * width + col) * 4 + 1] = 255; // G
-            img[(row * width + col) * 4 + 2] = 255; // B
-            img[(row * width + col) * 4 + 3] = 255; // A
+            img[(row * width + col) * 4 + 1] = 0; // G
+            img[(row * width + col) * 4 + 2] = 0; // B
+            img[(row * width + col) * 4 + 3] = calc_transparency(row, col, width); // A
         }
     }
 

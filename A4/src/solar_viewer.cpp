@@ -9,6 +9,7 @@
 
 #include "solar_viewer.h"
 #include "glmath.h"
+#include <math.h>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <array>
@@ -159,12 +160,14 @@ keyboard(int key, int scancode, int action, int mods)
             case GLFW_KEY_DOWN:
             {
                 x_angle_ += 10.0;
+                //x_angle_  = static_cast<float>(fmin(x_angle_, 80));
                 break;
             }
 
             case GLFW_KEY_UP:
             {
                 x_angle_ -= 10.0;
+                //x_angle_  = static_cast<float>(fmax(x_angle_, -80));
                 break;
             }
 
@@ -350,6 +353,7 @@ void Solar_viewer::paint()
         eye = vec4(0,0.012, -0.05, 1.0);
         center = ship_.pos_;
         new_eye = mat4::rotate_y(ship_.angle_+y_angle_)*eye;
+        up = mat4::rotate_y(ship_.angle_+y_angle_)*up;
 
     }
     // else check which planet you're looking at
@@ -359,8 +363,8 @@ void Solar_viewer::paint()
         eye = vec4(0,0,dist_factor_*planet_to_look_at_->radius_,1.0);
         center = planet_to_look_at_->pos_;
         // rotate in x and y around origin
-        new_eye = mat4::rotate_x(x_angle_)*eye;
-        new_eye = mat4::rotate_y(y_angle_)*new_eye;
+        new_eye = mat4::rotate_y(y_angle_)*mat4::rotate_x(x_angle_)*eye;
+        up = mat4::rotate_y(y_angle_)*mat4::rotate_x(x_angle_)*up;
     }
 
     // translate with respect to the object
@@ -368,7 +372,26 @@ void Solar_viewer::paint()
 
     mat4    view = mat4::look_at(vec3(new_eye), vec3(center), vec3(up));
 
-    billboard_x_angle_ = billboard_y_angle_ = 0.0f;
+    /** \todo Orient the billboard used to display the sun's glow
+     *  Update billboard_x_angle_ and billboard_y_angle_ so that the billboard plane
+     *  drawn to produce the sun's halo is orthogonal to the view vector for
+     *  the sun's center.
+     */
+    vec4       x = vec4(1,0,0,1);
+    vec4       y = vec4(0,1,0,1);
+    vec4       z = vec4(0,0,1,1);
+    vec3     n_b = sun_.pos_ - vec3(new_eye);
+    n_b = normalize(n_b);
+
+    billboard_x_angle_ = -90 + acos(n_b.y)*(180.0/M_PI); // temporary for debugging
+    // billboard_x_angle_ = 0; // for debugging
+
+    vec3    n_bx = vec3(n_b.x,0,0);
+    vec3   n_bz = vec3(0,0,n_b.z);
+    // why does this not work? what to do about the edge cases?
+    billboard_y_angle_ = atan2(n_b.x, n_b.z)*(180.0/M_PI);
+    // if (billboard_y_angle_ > 90) billboard_y_angle_ -= 180.0;
+    std::cout << billboard_x_angle_ << std::endl; 
 
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);
@@ -430,15 +453,15 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     // draw all spheres
     std::array<Planet *, 6> bodies = { &mercury_, &venus_, &earth_, &mars_, &stars_, &moon_ };
      for (int i = 0; i < 6; i++) {
-       m_matrix = mat4::translate(bodies[i]->pos_)* mat4::rotate_y(bodies[i]->angle_self_) * mat4::scale(bodies[i]->radius_) ;
-         mv_matrix = _view * m_matrix;
-         mvp_matrix = _projection * mv_matrix;
-         color_shader_.use();
-         color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
-	 color_shader_.set_uniform("tex",0);
-         color_shader_.set_uniform("greyscale", (int)greyscale_);
-         bodies[i]->tex_.bind();
-	 unit_sphere_.draw();	 
+      m_matrix = mat4::translate(bodies[i]->pos_)* mat4::rotate_y(bodies[i]->angle_self_) * mat4::scale(bodies[i]->radius_) ;
+      mv_matrix = _view * m_matrix;
+      mvp_matrix = _projection * mv_matrix;
+      color_shader_.use();
+      color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	    color_shader_.set_uniform("tex",0);
+      color_shader_.set_uniform("greyscale", (int)greyscale_);
+      bodies[i]->tex_.bind();
+	    unit_sphere_.draw();
      }
      // draw spaceship
      m_matrix = mat4::translate(ship_.pos_) * mat4::rotate_y(ship_.angle_) * mat4::scale(ship_.radius_) ;
@@ -450,6 +473,36 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
      color_shader_.set_uniform("greyscale", (int)greyscale_);
      ship_.tex_.bind();
      ship_.draw();
+
+
+//Billboard-part
+//-------------------------------------------
+    /** \todo Render the sun's halo here using the "color_shader_"
+    *   - Construct a model matrix that scales the billboard to 3 times the
+    *     sun's radius and orients it according to billboard_x_angle_ and
+    *     billboard_y_angle_
+    *   - Bind the texture for and draw sunglow_
+    **/
+
+     glEnable(GL_BLEND);
+     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+     // draw billboard sunglow_
+     m_matrix = mat4::translate(sun_.pos_)* mat4::rotate_y(billboard_y_angle_)* mat4::rotate_x(billboard_x_angle_) * mat4::scale(sun_.radius_*3);
+     mv_matrix = _view * m_matrix;
+     mvp_matrix = _projection * mv_matrix;
+     color_shader_.use();
+     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+     color_shader_.set_uniform("tex",0);
+     color_shader_.set_uniform("greyscale", (int)greyscale_);
+     sunglow_.tex_.bind();
+     sunglow_.draw();
+
+
+     glDisable(GL_BLEND);
+
+
+
     // check for OpenGL errors
     glCheckError();
 }
