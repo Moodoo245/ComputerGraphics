@@ -413,7 +413,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     vec4 light = vec4(0.0, 0.0, 0.0, 1.0); //in world coordinates
     // convert light into camera coordinates
     light = _view * light;
-
+	
     static float sun_animation_time = 0;
     if (timer_active_) sun_animation_time += 0.01f;
 
@@ -431,35 +431,42 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
 	
     unit_sphere_.draw();
 	
-    /** \todo Render the star background, the spaceship, and the rest of the celestial bodies.
-     *  For now, everything should be rendered with the color_shader_,
-     *  which expects uniforms "modelview_projection_matrix", "tex" and "grayscale"
-     *  and a single bound texture.
-     *
-     *  For each object, first compute the model matrix
-     *  (similarly to what you did in function update_body_positions()), model-view
-     *  matrix (use already computed _view) and model-view-projection matrix (use
-     *  already computed _projection).
-     *
-     *  Then set up the shader. Make use of the use() function defined in shader.cpp to
-     *  specify the handle of the shader program and set the uniform variables expected by
-     *  the shader.
-     *
-     *  Finally, bind the the texture (such that the sphere would be rendered with given
-     *  texture) and draw the sphere.
-     *
-     *  Hint: See how it is done for the Sun in the code above.
-     */
+
+	//render stars
+	m_matrix = mat4::translate(stars_.pos_)* mat4::rotate_y(stars_.angle_self_) * mat4::scale(stars_.radius_);
+	mv_matrix = _view * m_matrix;
+	mvp_matrix = _projection * mv_matrix;
+	color_shader_.use();
+	color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	color_shader_.set_uniform("tex", 0);
+	color_shader_.set_uniform("greyscale", (int)greyscale_);
+	stars_.tex_.bind();
+	unit_sphere_.draw();
+	/** \todo Switch from using color_shader_ to the fancier shaders you'll
+	* implement in this assignment:
+	*      mercury, venus, moon, mars, ship: phong_shader_
+	*      earth: earth_shader_
+	*      stars, sunglow: still use color_shader_
+	*  You'll need to make sure all the GLSL uniform variables are set. For
+	*  Phong shading, you need to pass in the modelview matrix, the normal transformation
+	*  matrix, and light position in addition to the color_shader_ parameters.
+	*/
     // draw all spheres
-    std::array<Planet *, 6> bodies = { &mercury_, &venus_, &earth_, &mars_, &stars_, &moon_ };
-     for (int i = 0; i < 6; i++) {
+    std::array<Planet *, 5> bodies = { &mercury_, &venus_, &earth_, &mars_, &moon_ };
+     for (int i = 0; i < 5; i++) {
       m_matrix = mat4::translate(bodies[i]->pos_)* mat4::rotate_y(bodies[i]->angle_self_) * mat4::scale(bodies[i]->radius_) ;
       mv_matrix = _view * m_matrix;
       mvp_matrix = _projection * mv_matrix;
-      color_shader_.use();
-      color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
-	    color_shader_.set_uniform("tex",0);
-      color_shader_.set_uniform("greyscale", (int)greyscale_);
+	  n_matrix = transpose(inverse(mat3(mv_matrix)));
+
+      phong_shader_.use();
+	  phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	  phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+	  phong_shader_.set_uniform("normal_matrix", n_matrix);
+	  phong_shader_.set_uniform("light_position", light);
+	  
+	  phong_shader_.set_uniform("tex",0);
+	  phong_shader_.set_uniform("greyscale", (int)greyscale_);
       bodies[i]->tex_.bind();
 	    unit_sphere_.draw();
      }
