@@ -160,14 +160,12 @@ keyboard(int key, int scancode, int action, int mods)
             case GLFW_KEY_DOWN:
             {
                 x_angle_ += 10.0;
-                //x_angle_  = static_cast<float>(fmin(x_angle_, 80));
                 break;
             }
 
             case GLFW_KEY_UP:
             {
                 x_angle_ -= 10.0;
-                //x_angle_  = static_cast<float>(fmax(x_angle_, -80));
                 break;
             }
 
@@ -349,7 +347,7 @@ void Solar_viewer::paint()
     // the you are in the ship we must see everything in the perspective of the ship
     if (in_ship_)
     {
-        // initializating
+        // put eye slightly above and behind spaceship
         eye = vec4(0,0.012, -0.05, 1.0);
         center = ship_.pos_;
         new_eye = mat4::rotate_y(ship_.angle_+y_angle_)*eye;
@@ -359,7 +357,7 @@ void Solar_viewer::paint()
     // else check which planet you're looking at
     else
     {
-        // initializating
+        // put eye on z-axis some distance planet_to_look_at
         eye = vec4(0,0,dist_factor_*planet_to_look_at_->radius_,1.0);
         center = planet_to_look_at_->pos_;
         // rotate in x and y around origin
@@ -367,7 +365,7 @@ void Solar_viewer::paint()
         up = mat4::rotate_y(y_angle_)*mat4::rotate_x(x_angle_)*up;
     }
 
-    // translate with respect to the object
+    // translate with respect to the center
     new_eye = mat4::translate(vec3(center))*new_eye;
 
     mat4    view = mat4::look_at(vec3(new_eye), vec3(center), vec3(up));
@@ -377,21 +375,14 @@ void Solar_viewer::paint()
      *  drawn to produce the sun's halo is orthogonal to the view vector for
      *  the sun's center.
      */
-    vec4       x = vec4(1,0,0,1);
-    vec4       y = vec4(0,1,0,1);
-    vec4       z = vec4(0,0,1,1);
+
+    // create billboardplane normal
     vec3     n_b = sun_.pos_ - vec3(new_eye);
     n_b = normalize(n_b);
 
-    billboard_x_angle_ = -90 + acos(n_b.y)*(180.0/M_PI); // temporary for debugging
-    // billboard_x_angle_ = 0; // for debugging
-
-    vec3    n_bx = vec3(n_b.x,0,0);
-    vec3   n_bz = vec3(0,0,n_b.z);
-    // why does this not work? what to do about the edge cases?
+    // update billboard angles
+    billboard_x_angle_ = -90 + acos(n_b.y)*(180.0/M_PI);
     billboard_y_angle_ = atan2(n_b.x, n_b.z)*(180.0/M_PI);
-    // if (billboard_y_angle_ > 90) billboard_y_angle_ -= 180.0;
-    std::cout << billboard_x_angle_ << std::endl; 
 
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);

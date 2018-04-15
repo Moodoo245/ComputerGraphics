@@ -95,17 +95,17 @@ bool Texture::uploadImage(std::vector<unsigned char> &img, unsigned width, unsig
 int calc_transparency(int row, int col, int width) {
 
         float radius = sqrt(std::pow(std::abs(row - width/2),2) + std::pow(std::abs(col - width/2),2));
-        // scale between 0 and 1
+        // make radius <150 opaque
         radius -= 150;
-        int cutoff = 300; // hmmm.. in percentage maybe
+        // bigger radiuses get completely transparent to prevent billboard edges to show
+        int cutoff = 300;
         if (radius < 0) return 255;
-        if (radius > 300) return 0;
-        //float exp_dist = exp(1-radius);
-        //exp_dist = exp_dist/(exp((width-300)/2));
-        radius = radius/((width-300)/2);
+        if (radius > cutoff) return 0;
 
-
-        return std::floor((1-radius)*255);
+        // scale between 0 and 1
+        radius = radius/((width-2*(150+300-cutoff))/2);
+        // use pow() to get a nice gradual diminishing visibility of glow
+        return std::floor(pow((1-radius),12)*255);
     }
 
 bool Texture::createSunBillboardTexture()
@@ -128,7 +128,7 @@ bool Texture::createSunBillboardTexture()
     for (int col = 0; col < width; ++col) {
         for (int row = 0; row < height; ++row) {
             img[(row * width + col) * 4 + 0] = 255; // R
-            img[(row * width + col) * 4 + 1] = 0; // G
+            img[(row * width + col) * 4 + 1] = 100; // G
             img[(row * width + col) * 4 + 2] = 0; // B
             img[(row * width + col) * 4 + 3] = calc_transparency(row, col, width); // A
         }
