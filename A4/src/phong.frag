@@ -35,7 +35,7 @@ void main()
      */
 	
 
-	vec3 r = reflect(v2f_light, v2f_normal);
+	vec3 r =  normalize((2.0 * dot(v2f_normal,v2f_light)) * v2f_normal - v2f_light);
     vec3 color = (0.2 * sunlight) * texture(tex, v2f_texcoord).rgb;
 	
 	if(dot(v2f_normal, v2f_light) > 0) {
