@@ -11,6 +11,7 @@
 
 void ShadowViewer::initialize() {
     m_initialized = true;
+
     m_quad.initialize();
     m_updateMesh();
     m_cubeMapVisualization.initialize();
@@ -33,7 +34,7 @@ void ShadowViewer::m_updateMesh() {
 // shadow cube map for light 'li'.
 mat4 ShadowViewer::m_constructLightViewMatrix(size_t li, size_t cube_face) const {
     assert((li < m_numActiveLights) && (cube_face < 6));
-    mat4 scene_view_matrix = m_constructSceneViewMatrix();
+
     /** \todo
     * Construct the viewing matrix for rendering the scene from the perspective
     * of the light looking through cube face number cube_face.
@@ -44,7 +45,51 @@ mat4 ShadowViewer::m_constructLightViewMatrix(size_t li, size_t cube_face) const
     * defined by scene_view_matrix.
     * Hint: use mat4::look_at
     **/
-    return mat4::identity() * scene_view_matrix;
+
+    // matrix that transform from world_coord to eye_coord
+    mat4 scene_view_matrix = m_constructSceneViewMatrix();
+
+    vec4      up;
+    vec4  center;
+    // the light is given in world coord. So it must be made into eye-coord
+    vec4 light_camera = m_light[li].position();
+    light_camera = scene_view_matrix * light_camera;
+
+    // define the up vector and point to look at IN the eye coord.
+    switch(cube_face) {
+        case 0:
+            up     = vec4(0,1,0,0);
+            center = vec4(0,0,-1,0);
+            break;
+        case 1:
+            up     = vec4(0,1,0,0);
+            center = vec4(0,0,1,0);
+            break;
+        case 2:
+            up     = vec4(0,0,-1,0);
+            center = vec4(0,0,0,0);
+            break;
+        case 3:
+            up     = vec4(0,0,1,0);
+            center = vec4(0,0,0,0);
+            break;
+        case 4:
+            up     = vec4(0,1,0,0);
+            center = vec4(1,0,0,0);
+            break;
+        case 5:
+            up     = vec4(0,1,0,0);
+            center = vec4(-1,0,0,0);
+            break;
+    }
+
+        // View controls
+
+    // use look_at() in eye_coord to transform from eye coord to light_camera coord
+    mat4 view_light = mat4::look_at(vec3(light_camera), vec3(center), vec3(up));
+
+    // finally apply matrices to go from world_coord --> eye_coord --> light_camera_coord
+    return view_light * scene_view_matrix;
 }
 
 mat4 ShadowViewer::m_constructLightProjectionMatrix() const {
