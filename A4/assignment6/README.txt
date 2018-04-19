@@ -12,7 +12,11 @@ Using the Computer Graphics course theory slides here is how we solved each foll
 - Lastly we implemented the orientation of the billboard facing the eye. Calculated the normal of the billboard plane by subtracting the eye position from the sun position. The using trigonometry to calculate the different angles from the information in the normal. Thereafter scaling from radians to degrees.
 
 #### Phong lighting model
-
+-Implemented phong.vert and phong.frag using the course slides.
+-phong.vert computes view, light, normal
+-phong.frag computes r using the mirror equation we saw in the previous weeks and does phong shading
+-Modified draw_scene() such that the celestial bodies(except earth) and the ship use phong shading
+-normal matrix is the transpose of the inverse of the modelview_matrix as seen in the course
 
 #### Shading the earth
 Using Phong lighting as a base, implemented earth shader according to assignment document steps:
@@ -22,6 +26,6 @@ Using Phong lighting as a base, implemented earth shader according to assignment
 
 
 Collaborators:
-Justinas Sukaitis (34%)
+Justinas Sukaitis (33%)
 Håvard Bjørnøy (33%)
-Sebastian Chevaleyre (33%)
+Sebastian Chevaleyre (34%)
