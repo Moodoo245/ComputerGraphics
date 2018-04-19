@@ -15,7 +15,10 @@ Using the Computer Graphics course theory slides here is how we solved each foll
 
 
 #### Shading the earth
-
+Using Phong lighting as a base, implemented earth shader according to assignment document steps:
+- earth.vert is a copy of phong.vert.
+- earth.frag computes color based on the four earth textures, with cloudiness (cloud luminance) interpolating between day color and cloud color, and daylight ( n.l ) interpolating between day and night.
+- In solar_viewer.cpp, earth is rendered using the earth shader. Parameters are the same with phonng exept that each texture has to be properly binded.
 
 
 Collaborators:
