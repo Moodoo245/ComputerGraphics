@@ -59,6 +59,34 @@ mat4 ShadowViewer::m_constructLightViewMatrix(size_t li, size_t cube_face) const
     switch(cube_face) {
         case 0:
             up     = vec4(0,1,0,0);
+            center = vec4(1,0,0,0);
+            break;
+        case 1:
+            up     = vec4(0,1,0,0);
+            center = vec4(-1,0,0,0);
+            break;
+        case 2:
+            up     = vec4(0,0,-1,0);
+            center = vec4(0,1,0,0);
+            break;
+        case 3:
+            up     = vec4(0,0,1,0);
+            center = vec4(0,-1,0,0);
+            break;
+        case 4:
+            up     = vec4(0,1,0,0);
+            center = vec4(0,0,1,0);
+            break;
+        case 5:
+            up     = vec4(0,1,0,0);
+            center = vec4(0,0,-1,0);
+            break;
+    }
+    /*
+    //HOW IT REALLY SHOULD BE?
+    switch(cube_face) {
+        case 0:
+            up     = vec4(0,1,0,0);
             center = vec4(0,0,-1,0);
             break;
         case 1:
@@ -67,11 +95,11 @@ mat4 ShadowViewer::m_constructLightViewMatrix(size_t li, size_t cube_face) const
             break;
         case 2:
             up     = vec4(0,0,-1,0);
-            center = vec4(0,0,0,0);
+            center = vec4(1,0,0,0);
             break;
         case 3:
             up     = vec4(0,0,1,0);
-            center = vec4(0,0,0,0);
+            center = vec4(1,0,0,0);
             break;
         case 4:
             up     = vec4(0,1,0,0);
@@ -82,6 +110,9 @@ mat4 ShadowViewer::m_constructLightViewMatrix(size_t li, size_t cube_face) const
             center = vec4(-1,0,0,0);
             break;
     }
+    */
+
+    center += light_camera;
 
         // View controls
 
@@ -97,7 +128,10 @@ mat4 ShadowViewer::m_constructLightProjectionMatrix() const {
     * Construct the projection matrix for rendering the scene from the perspective
     * of the light to generate shadow maps.
     **/
-    return mat4::identity();
+
+    mat4 projection = mat4::perspective(90, 1, 0.1, 6); // fovy_, (float)width_/(float)height_
+
+    return projection;
 }
 
 void ShadowViewer::m_render_shadow_cubemap(size_t li, const mat4 &plane_m_matrix, const mat4 &mesh_m_matrix) {
