@@ -46,6 +46,29 @@ void main()
     ***/
     vec3 color = vec3(0.0f);
 
+	vec3 v2f_light = light_position -  v2f_ec_vertex;
+	vec3 v2f_view = normalize(-sign(v2f_ec_vertex));	
+
+
+	if(sqrt(dot(v2f_light, v2f_light)) < texture(shadow_map, normalize(v2f_light)).r) {
+
+		v2f_light = normalize(v2f_light);
+		vec3 r =  normalize((2.0 * dot(v2f_normal,v2f_light)) * v2f_normal - v2f_light);
+		// vec3 color = (0.2 * sunlight) * texture(tex, v2f_texcoord).rgb;
+	
+		if(dot(v2f_normal, v2f_light) > 0) {
+			color += light_color * diffuse_color * dot(v2f_normal, v2f_light);
+	
+			if(dot(r, v2f_view) > 0) color += light_color * specular_color * pow(dot(r, v2f_view), shininess);
+	
+		}
+		// convert RGB color to YUV color and use only the luminance
+	
+		// if (greyscale) color = vec3(0.299*color.r+0.587*color.g+0.114*color.b);
+
+		
+	}
+
     // append the required alpha value
     f_light_contribution = vec4(color, 1.0);
 }
