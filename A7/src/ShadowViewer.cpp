@@ -221,21 +221,19 @@ void ShadowViewer::draw(const mat4 &view_matrix, const mat4 &projection_matrix) 
         * Hint: read the documentation for glBlendFunc
         **/
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_SRC_COLOR);
-		mat4 m_matrix = mat4::translate(m_light[li].position()) * mat4::scale(0.05);
-		mat4 mv_matrix = view_matrix * m_matrix;
-		mat4 mvp_matrix = projection_matrix * mv_matrix;
-		mat3 n_matrix = transpose(inverse(mat3(mv_matrix)));
+		glBlendFunc(GL_ONE, GL_ONE);
         m_phong_shader.use();
         m_shadowMap->bind();
 
         m_phong_shader.set_uniform("shininess", 8.0f, true); // pass 'optional = true' to avoid 'Invalid uniform location'
         m_phong_shader.set_uniform("shadow_map",   0, true); // warnings caused by incomplete shader implementations
-		m_phong_shader.set_uniform("modelview_projection_matrix", mvp_matrix);
-		m_phong_shader.set_uniform("modelview_matrix", mv_matrix);
-		m_phong_shader.set_uniform("normal_matrix", n_matrix);
-		m_phong_shader.set_uniform("light_position", m_light[li].position());
+		m_phong_shader.set_uniform("modelview_projection_matrix", mesh_mvp_matrix);
+		m_phong_shader.set_uniform("modelview_matrix", mesh_mv_matrix);
+		m_phong_shader.set_uniform("normal_matrix", mesh_n_matrix);
+		m_phong_shader.set_uniform("light_position", vec3(view_matrix * m_light[li].position()));
 		m_phong_shader.set_uniform("light_color", m_light[li].color);
+		m_phong_shader.set_uniform("diffuse_color", mesh_diffuse);
+		m_phong_shader.set_uniform("specular_color", mesh_specular);
 		m_mesh->draw();
 
 
