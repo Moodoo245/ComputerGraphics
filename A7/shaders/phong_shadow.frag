@@ -50,7 +50,7 @@ void main()
 	vec3 v2f_view = normalize(-v2f_ec_vertex);	
 
 	vec3 light_ray = v2f_ec_vertex - light_position;
-	if(sqrt(dot(light_ray, light_ray)) < 1.05 * texture(shadow_map, v2f_light).r) {
+	if(sqrt(dot(light_ray, light_ray)) < 1.05 * texture(shadow_map, -v2f_light).r) {
 
 		vec3 r =  normalize((2.0 * dot(v2f_normal,v2f_light)) * v2f_normal - v2f_light);
 	
