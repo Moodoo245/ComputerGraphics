@@ -52,10 +52,10 @@ void main()
 	vec3 light_ray = v2f_ec_vertex - light_position;
 	if(sqrt(dot(light_ray, light_ray)) < 1.05 * texture(shadow_map, -v2f_light).r) {
 
-		vec3 r =  normalize((2.0 * dot(v2f_normal,v2f_light)) * v2f_normal - v2f_light);
+		vec3 r =  normalize((2.0 * dot(v2f_normal,v2f_light)) * N - v2f_light);
 	
-		if(dot(v2f_normal, v2f_light) > 0) {
-			color += light_color * diffuse_color * dot(v2f_normal, v2f_light);
+		if(dot(N, v2f_light) > 0) {
+			color += light_color * diffuse_color * dot(N, v2f_light);
 	
 			if(dot(r, v2f_view) > 0) color += light_color * specular_color * pow(dot(r, v2f_view), shininess);
 	
