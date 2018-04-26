@@ -32,9 +32,6 @@ std::string LindenmayerSystemDeterministic::expandSymbol(unsigned char const& sy
 	else {
 		return {char(sym)};
 	}
-
-	//char rule = rules.find(sym);
-	//return {char(rule)}; // this constructs string from char
 	
 	//============================================================
 
@@ -89,7 +86,7 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 
 	for(char sym : symbols) {
 	    if (sym=='+'){
-	    	// rotates the direction f by the angle δ counter-clockwise
+	    	// r+ otates the direction f by the angle δ counter-clockwise
 
 	    	float s = sin(rotation_angle_deg * (M_PI/180));
   			float c = cos(rotation_angle_deg * (M_PI/180));
@@ -101,7 +98,7 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 	    }
 	    
 	    else if (sym=='-'){
-	    	// rotates the direction f by the angle δ counter-clockwise
+	    	// - rotates the direction f by the angle δ clockwise
 
 	    	float s = sin(-rotation_angle_deg * (M_PI/180));
   			float c = cos(-rotation_angle_deg * (M_PI/180));
@@ -113,9 +110,13 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 	    }
 
 	    else if (sym=='['){
+	    	// [ saves the current state (p,f) on a stack (starts a branch)
+
 	    	saved_states.push(std::make_pair(p, f));
 	    }
 	    else if (sym==']'){
+	    	// ] restores the most-recently-saved state (ends the branch)
+	    	
 	    	if(!saved_states.empty()) {
 	    		p = saved_states.top().first;
 	    		f = saved_states.top().second;
