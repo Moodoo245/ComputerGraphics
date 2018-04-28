@@ -81,6 +81,8 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 	*/
 	vec2 p = vec2(0, 0);
 	vec2 f = vec2(0, 1);
+	float new_x;
+	float new_y;
 	std::vector<Segment> Segments;
 	std::stack<std::pair<vec2, vec2>> saved_states;
 
@@ -91,8 +93,10 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 	    	float s = sin(rotation_angle_deg * (M_PI/180));
   			float c = cos(rotation_angle_deg * (M_PI/180));
   			//update direction
-  			f[0] = f[0] * c - f[1] * s;
-  			f[1] = f[0] * s + f[1] * c;
+  			new_x = f[0] * c - f[1] * s;
+  			new_y = f[0] * s + f[1] * c;
+  			f[0] = new_x;
+  			f[1] = new_y;
   			// normalize afterwards so every segment is length 1
   			f = normalize(f);
 	    }
@@ -103,8 +107,10 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 	    	float s = sin(-rotation_angle_deg * (M_PI/180));
   			float c = cos(-rotation_angle_deg * (M_PI/180));
   			//update direction
-  			f[0] = f[0] * c - f[1] * s;
-  			f[1] = f[0] * s + f[1] * c;
+  			new_x = f[0] * c - f[1] * s;
+  			new_y = f[0] * s + f[1] * c;
+  			f[0] = new_x;
+  			f[1] = new_y;
   			// normalize afterwards so every segment is length 1
   			f = normalize(f);
 	    }
@@ -116,7 +122,7 @@ std::vector<Segment> LindenmayerSystem::draw(std::string const& symbols) {
 	    }
 	    else if (sym==']'){
 	    	// ] restores the most-recently-saved state (ends the branch)
-	    	
+
 	    	if(!saved_states.empty()) {
 	    		p = saved_states.top().first;
 	    		f = saved_states.top().second;
