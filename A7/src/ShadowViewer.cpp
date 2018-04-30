@@ -82,35 +82,6 @@ mat4 ShadowViewer::m_constructLightViewMatrix(size_t li, size_t cube_face) const
             center = vec4(0,0,-1,0);
             break;
     }
-    /*
-    //HOW IT REALLY SHOULD BE?
-    switch(cube_face) {
-        case 0:
-            up     = vec4(0,1,0,0);
-            center = vec4(0,0,-1,0);
-            break;
-        case 1:
-            up     = vec4(0,1,0,0);
-            center = vec4(0,0,1,0);
-            break;
-        case 2:
-            up     = vec4(0,0,-1,0);
-            center = vec4(1,0,0,0);
-            break;
-        case 3:
-            up     = vec4(0,0,1,0);
-            center = vec4(1,0,0,0);
-            break;
-        case 4:
-            up     = vec4(0,1,0,0);
-            center = vec4(1,0,0,0);
-            break;
-        case 5:
-            up     = vec4(0,1,0,0);
-            center = vec4(-1,0,0,0);
-            break;
-    }
-    */
 
     center += light_camera;
 
