@@ -77,7 +77,7 @@ float perlin_noise_1d(float x) {
 	float upper_eval = upper_gradient*(x - upper_grid.x);
 
 
-	return blending_weight_poly(x - lower_grid.x)*lower_eval + blending_weight_poly(upper_grid.x - x)*upper_eval;
+	return mix(lower_eval, upper_eval, blending_weight_poly(x - lower_grid.x));
 }
 
 float perlin_fbm_1d(float x) {
@@ -91,9 +91,10 @@ float perlin_fbm_1d(float x) {
 	 */
 	float partial_fbm = 0.0f;
 	for(int i = 0; i < num_octaves; i++){
-		partial_fbm += (pow(ampl_multiplier, i) * perlin_noise_1d(x * pow(freq_multriplier, i)));
+		partial_fbm += (pow(ampl_multiplier, i) * perlin_noise_1d(x * pow(freq_multiplier, i)));
 	}
-	return 0.0f;
+	//std::cout << "Randomizing planets..." << std::endl;
+	return partial_fbm;
 }
 
 // ----- plotting -----
