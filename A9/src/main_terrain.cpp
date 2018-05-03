@@ -49,8 +49,9 @@ std::shared_ptr<Mesh> build_terrain_mesh(Array2D<float> const& height_map) {
 	// (iterate over y first then over x to use CPU cache better)
 	for(int gy = 0; gy < grid_size.second; gy++) {
 		for(int gx = 0; gx < grid_size.first; gx++) {
-			int const idx = xy_to_v_index(gx, gy);
 
+			int const idx = xy_to_v_index(gx, gy);
+			float z = std::clamp(height_map(gx, gy), WATER_LEVEL, FLT_MAX);
 			/** \todo
 			 * Generate the displaced terrain vertex corresponding to integer
 			 * grid location (gx, gy). The height (Z coordinate) of this vertex
@@ -59,7 +60,7 @@ std::shared_ptr<Mesh> build_terrain_mesh(Array2D<float> const& height_map) {
 			 * The XY coordinates are calculated so that the full grid covers
 			 * the square [-0.5, 0.5]^2 in the XY plane.
 			 */
-			vertices[idx] = vec3(0, 0, 0);
+			vertices[idx] = vec3(x - 0.5f, y - 0.5f, z);
 		}
 	}
 
