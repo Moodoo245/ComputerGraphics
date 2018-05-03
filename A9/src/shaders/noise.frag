@@ -176,7 +176,11 @@ float perlin_fbm(vec2 point) {
 	 * should use the constants num_octaves, freq_multiplier, and
 	 * ampl_multiplier. 
 	 */
-	return 0.0f;
+	float partial_fbm = 0.0f;
+	for(int i = 0; i < num_octaves; i++){
+		partial_fbm += (pow(ampl_multiplier, i) * perlin_noise(point * pow(freq_multiplier, i)));
+	}
+	return partial_fbm;
 }
 
 // ==============================================================
@@ -188,7 +192,11 @@ float turbulence(vec2 point) {
 	 * Implement the 2D turbulence function as described in the handout.
 	 * Again, you should use num_octaves, freq_multiplier, and ampl_multiplier.
 	 */
-	return 0.0f;
+	float partial_fbm = 0.0f;
+	for(int i = 0; i < num_octaves; i++){
+		partial_fbm += (pow(ampl_multiplier, i) * abs(perlin_noise(point * pow(freq_multiplier, i))));
+	}
+	return partial_fbm;
 }
 
 // ==============================================================
