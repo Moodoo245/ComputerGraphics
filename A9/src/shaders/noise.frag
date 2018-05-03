@@ -1,6 +1,7 @@
 #version 140
 #pragma optionNV unroll all
 
+
 //=============================================================================
 //	Exercise code for "Introduction to Computer Graphics 2018"
 //     by
@@ -62,7 +63,21 @@ float perlin_noise_1d(float x) {
 	 * values using the smooth interolation polygnomial blending_weight_poly.
 	 * Note: gradients in the gradient lookup table are 2D, 
 	 */
-	return 0.0f;
+
+	// determine two gridpoints closest to x
+	vec2 lower_grid = vec2(floor(x), 0);
+	vec2 upper_grid = vec2(lower_grid.x + 1, 0);
+
+	// calculate gradients 
+	float lower_gradient = gradients[hash_func(lower_grid) % NUM_GRADIENTS].x;
+	float upper_gradient = gradients[hash_func(upper_grid) % NUM_GRADIENTS].x;
+
+	// evaluate the linear functions
+	float lower_eval = lower_gradient*(x - lower_grid.x);
+	float upper_eval = upper_gradient*(x - upper_grid.x);
+
+
+	return blending_weight_poly(x - lower_grid.x)*lower_eval + blending_weight_poly(upper_grid.x - x)*upper_eval;
 }
 
 float perlin_fbm_1d(float x) {
