@@ -51,8 +51,13 @@ std::shared_ptr<Mesh> build_terrain_mesh(Array2D<float> const& height_map) {
 		for(int gx = 0; gx < grid_size.first; gx++) {
 
 			int const idx = xy_to_v_index(gx, gy);
-			float z = std::clamp(height_map(gx, gy), WATER_LEVEL, FLT_MAX);
-			/** \todo
+
+			float x = (gx /(grid_size.first - 1.0)) - 0.5;
+			float y = (gy / (grid_size.second - 1.0)) - 0.5;
+			float z = height_map(gx, gy);
+			if (z < WATER_LEVEL) {
+				z = WATER_LEVEL;
+			}/** \todo
 			 * Generate the displaced terrain vertex corresponding to integer
 			 * grid location (gx, gy). The height (Z coordinate) of this vertex
 			 * is determined by height_map, however if the point falls below
@@ -60,7 +65,7 @@ std::shared_ptr<Mesh> build_terrain_mesh(Array2D<float> const& height_map) {
 			 * The XY coordinates are calculated so that the full grid covers
 			 * the square [-0.5, 0.5]^2 in the XY plane.
 			 */
-			vertices[idx] = vec3(x - 0.5f, y - 0.5f, z);
+			vertices[idx] = vec3(x, y, z);
 		}
 	}
 
@@ -71,6 +76,12 @@ std::shared_ptr<Mesh> build_terrain_mesh(Array2D<float> const& height_map) {
 			 * Triangulate the grid cell whose lower lefthand corner is grid index (gx, gy)
 			 * (You will need to create two triangles to fill the quad.)
 			 **/
+			Mesh::Face left = Mesh::Face(xy_to_v_index(gx, gy), xy_to_v_index(gx + 1, gy), xy_to_v_index(gx, gy + 1));
+			faces.push_back(left);
+			Mesh::Face right = Mesh::Face(xy_to_v_index(gx + 1, gy), xy_to_v_index(gx + 1, gy + 1), xy_to_v_index(gx, gy + 1));
+			faces.push_back(right);
+			
+
 		}
 	}
 
@@ -79,7 +90,8 @@ std::shared_ptr<Mesh> build_terrain_mesh(Array2D<float> const& height_map) {
 
 
 int main(int arg_count, char *arg_values[]) {
-	std::pair<size_t, size_t> grid_size(96, 96);
+	//change values to change grid resolution
+	std::pair<size_t, size_t> grid_size(256, 256);
 
 	// If we try to build meshes when no window is created (GLFW is not loaded)
 	// calls to OpenGL will crash randomly
