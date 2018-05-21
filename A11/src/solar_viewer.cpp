@@ -88,7 +88,19 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
-            // \todo Paste your dist_factor_-modifying keypress code from assignment 5.
+			case GLFW_KEY_8:
+			{
+				dist_factor_ -= 1.0;
+				dist_factor_ = static_cast<float>(fmax(dist_factor_, -2.5));
+				break;
+			}
+
+			case GLFW_KEY_9:
+			{
+				dist_factor_ += 1.0;
+				dist_factor_ = static_cast<float>(fmin(dist_factor_, 20.0));
+				break;
+			}
 
             case GLFW_KEY_R:
             {
@@ -196,7 +208,18 @@ keyboard(int key, int scancode, int action, int mods)
 // around their orbits. This position is needed to set up the camera in the scene
 // (see Solar_viewer::paint)
 void Solar_viewer::update_body_positions() {
-    // \todo Paste your planet positioning code from assignment 5 here.
+	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &earth_, &mars_ };
+	for (int i = 0; i < 4; i++) {
+
+		bodies[i]->pos_ = vec4(bodies[i]->distance_*cos(bodies[i]->angle_orbit_),
+			bodies[i]->pos_.y,
+			bodies[i]->distance_*(-sin(bodies[i]->angle_orbit_)),
+			bodies[i]->pos_.w);
+	}
+	moon_.pos_ = vec4(earth_.pos_.x + moon_.distance_*cos(moon_.angle_orbit_),
+		moon_.pos_.y,
+		earth_.pos_.z + moon_.distance_*(-sin(moon_.angle_orbit_)),
+		moon_.pos_.w);
 }
 
 //-----------------------------------------------------------------------------
@@ -312,12 +335,37 @@ void Solar_viewer::paint()
     // clear framebuffer and depth buffer first
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // \todo Paste your viewing/navigation code from assignment 5 here.
-    vec4     eye = vec4(0,0,7,1.0);
-    vec4  center = sun_.pos_;
-    vec4      up = vec4(0,1,0,0);
-    float radius = sun_.radius_;
-    mat4    view = mat4::look_at(vec3(eye), (vec3)center, (vec3)up);
+	vec4      up = vec4(0, 1, 0, 0);
+	vec4     eye;
+	vec4  center;
+	vec4 new_eye;
+
+	// the you are in the ship we must see everything in the perspective of the ship
+	if (in_ship_)
+	{
+		// put eye slightly above and behind spaceship
+		eye = vec4(0, 0.012, -0.05, 1.0);
+		center = ship_.pos_;
+		new_eye = mat4::rotate_y(ship_.angle_ + y_angle_)*eye;
+		up = mat4::rotate_y(ship_.angle_ + y_angle_)*up;
+
+	}
+	// else check which planet you're looking at
+	else
+	{
+		// put eye on z-axis some distance planet_to_look_at
+		eye = vec4(0, 0, dist_factor_*planet_to_look_at_->radius_, 1.0);
+		center = planet_to_look_at_->pos_;
+		// rotate in x and y around origin
+		new_eye = mat4::rotate_y(y_angle_)*mat4::rotate_x(x_angle_)*eye;
+		up = mat4::rotate_y(y_angle_)*mat4::rotate_x(x_angle_)*up;
+	}
+
+	// translate with respect to the center
+	new_eye = mat4::translate(vec3(center))*new_eye;
+
+	mat4    view = mat4::look_at(vec3(new_eye), vec3(center), vec3(up));
+
     /** \todo
      * Assignment 11, Task 6
      * Paste your viewing/navigation code from assignment 5 here, then
@@ -328,7 +376,14 @@ void Solar_viewer::paint()
      * Recall that we use a hard-coded viewing radius of 0.01f for the ship.
      */
 
-    // \todo Paste your billboard angle computation from assignment 6 here.
+	 // create billboardplane normal
+	vec3     n_b = sun_.pos_ - vec3(new_eye);
+	n_b = normalize(n_b);
+
+	// update billboard angles
+	billboard_x_angle_ = -90 + acos(n_b.y)*(180.0 / M_PI);
+	billboard_y_angle_ = atan2(n_b.x, n_b.z)*(180.0 / M_PI);
+
 
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);
@@ -385,9 +440,72 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     sun_.tex_.bind();
     unit_sphere_.draw();
 
-    // \todo Paste your star/planet/moon/ship drawing calls from assignment 5 here.
+	//render stars
+	m_matrix = mat4::translate(stars_.pos_)* mat4::rotate_y(stars_.angle_self_) * mat4::scale(stars_.radius_);
+	mv_matrix = _view * m_matrix;
+	mvp_matrix = _projection * mv_matrix;
+	color_shader_.use();
+	color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	color_shader_.set_uniform("tex", 0);
+	color_shader_.set_uniform("greyscale", (int)greyscale_);
+	stars_.tex_.bind();
+	unit_sphere_.draw();
+	
+	// draw all spheres
+	std::array<Planet *, 4> bodies = { &mercury_, &venus_, &mars_, &moon_ };
+	for (int i = 0; i < 4; i++) {
+		m_matrix = mat4::translate(bodies[i]->pos_)* mat4::rotate_y(bodies[i]->angle_self_) * mat4::scale(bodies[i]->radius_);
+		mv_matrix = _view * m_matrix;
+		mvp_matrix = _projection * mv_matrix;
+		n_matrix = transpose(inverse(mat3(mv_matrix)));
 
-    // \todo Paste your star/planet/moon/ship drawing calls from assignment 6 here.
+		phong_shader_.use();
+		phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+		phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+		phong_shader_.set_uniform("normal_matrix", n_matrix);
+		phong_shader_.set_uniform("light_position", light);
+
+		phong_shader_.set_uniform("tex", 0);
+		phong_shader_.set_uniform("greyscale", (int)greyscale_);
+		bodies[i]->tex_.bind();
+		unit_sphere_.draw();
+	}
+	// draw earth
+	m_matrix = mat4::translate(earth_.pos_) * mat4::rotate_y(earth_.angle_self_) * mat4::scale(earth_.radius_);
+	mv_matrix = _view * m_matrix;
+	mvp_matrix = _projection * mv_matrix;
+	n_matrix = transpose(inverse(mat3(mv_matrix)));
+	earth_shader_.use();
+	earth_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	earth_shader_.set_uniform("modelview_matrix", mv_matrix);
+	earth_shader_.set_uniform("normal_matrix", n_matrix);
+	earth_shader_.set_uniform("light_position", light);
+	earth_shader_.set_uniform("day_texture", 0);
+	earth_shader_.set_uniform("night_texture", 1);
+	earth_shader_.set_uniform("cloud_texture", 2);
+	earth_shader_.set_uniform("gloss_texture", 3);
+	earth_shader_.set_uniform("greyscale", (int)greyscale_);
+	earth_.night_.bind();
+	earth_.cloud_.bind();
+	earth_.gloss_.bind();
+	earth_.tex_.bind();
+	unit_sphere_.draw();
+	// draw spaceship
+	m_matrix = mat4::translate(ship_.pos_) * mat4::rotate_y(ship_.angle_) * mat4::scale(ship_.radius_);
+	mv_matrix = _view * m_matrix;
+	mvp_matrix = _projection * mv_matrix;
+	n_matrix = transpose(inverse(mat3(mv_matrix)));
+
+	phong_shader_.use();
+	phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+	phong_shader_.set_uniform("normal_matrix", n_matrix);
+	phong_shader_.set_uniform("light_position", light);
+
+	phong_shader_.set_uniform("tex", 0);
+	phong_shader_.set_uniform("greyscale", (int)greyscale_);
+	ship_.tex_.bind();
+	ship_.draw();
 
     /** \todo
      * Assignment 11, Task 4:
@@ -399,7 +517,22 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
      * and its up direction is +y.
     **/
 
-    // \todo Paste your billboard drawing code from assignment 6 here.
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// draw billboard sunglow_
+	m_matrix = mat4::translate(sun_.pos_)* mat4::rotate_y(billboard_y_angle_)* mat4::rotate_x(billboard_x_angle_) * mat4::scale(sun_.radius_ * 3);
+	mv_matrix = _view * m_matrix;
+	mvp_matrix = _projection * mv_matrix;
+	color_shader_.use();
+	color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+	color_shader_.set_uniform("tex", 0);
+	color_shader_.set_uniform("greyscale", (int)greyscale_);
+	sunglow_.tex_.bind();
+	sunglow_.draw();
+
+
+	glDisable(GL_BLEND);
 
     // check for OpenGL errors
     glCheckError();
