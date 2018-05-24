@@ -248,7 +248,7 @@ void Solar_viewer::timer()
          * so that the ship moves by (approximately) Euclidean distance
          * `ship_speed` in this frame.
          **/
-        ship_path_param_ = 0;
+        ship_path_param_ +=  ship_speed/(norm(ship_path_.tangent(ship_path_param_)));
         if (ship_path_param_ >= 1) { ship_path_param_ = 0; }
         vec3 tangent = ship_path_.tangent(ship_path_param_);
         ship_path_frame_.alignTo(tangent);
@@ -345,9 +345,12 @@ void Solar_viewer::paint()
 	{
 		// put eye slightly above and behind spaceship
 		eye = vec4(0, 0.012, -0.05, 1.0);
-		center = ship_.pos_;
-		new_eye = mat4::rotate_y(ship_.angle_ + y_angle_)*eye;
-		up = mat4::rotate_y(ship_.angle_ + y_angle_)*up;
+		center = vec4(ship_path_(ship_path_param_),1.0);
+        vec3 t_ = ship_path_frame_.t;
+        float up_angle = -90 + 180.0*acos(t_[1])/M_PI;
+        float left_angle = 180.0*atan2(t_[0],t_[2])/M_PI;
+		new_eye = mat4::rotate_y(left_angle + y_angle_)*mat4::rotate_x(up_angle)*eye;
+		up = mat4::rotate_y(left_angle + y_angle_)*mat4::rotate_x(up_angle)*up;
 
 	}
 	// else check which planet you're looking at
@@ -375,6 +378,7 @@ void Solar_viewer::paint()
      * `ship_path_frame_`.
      * Recall that we use a hard-coded viewing radius of 0.01f for the ship.
      */
+    
 
 	 // create billboardplane normal
 	vec3     n_b = sun_.pos_ - vec3(new_eye);
@@ -491,7 +495,10 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
 	earth_.tex_.bind();
 	unit_sphere_.draw();
 	// draw spaceship
-	m_matrix = mat4::translate(ship_.pos_) * mat4::rotate_y(ship_.angle_) * mat4::scale(ship_.radius_);
+    vec3 t_ = ship_path_frame_.t;
+    float up_angle = -90 + 180.0*acos(t_[1])/M_PI;
+    float left_angle = 180.0*atan2(t_[0],t_[2])/M_PI;
+	m_matrix = mat4::translate(ship_path_(ship_path_param_)) * mat4::rotate_y(left_angle)*mat4::rotate_x(up_angle) * mat4::scale(ship_.radius_);
 	mv_matrix = _view * m_matrix;
 	mvp_matrix = _projection * mv_matrix;
 	n_matrix = transpose(inverse(mat3(mv_matrix)));
